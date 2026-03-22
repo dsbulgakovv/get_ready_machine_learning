@@ -24,6 +24,19 @@ CATEGORY_LABELS = {
     "production": "Production",
     "statistics": "Statistics",
 }
+CATEGORY_ORDER = [
+    "classic_ml",
+    "deep_learning",
+    "nlp_llm",
+    "cv",
+    "recsys",
+    "metrics",
+    "statistics",
+    "python",
+    "production",
+    "databases",
+]
+CATEGORY_ORDER_INDEX = {name: idx for idx, name in enumerate(CATEGORY_ORDER)}
 
 
 def extract_title(text: str) -> str:
@@ -94,7 +107,14 @@ def build_manifest() -> list[dict[str, object]]:
             }
         )
 
-    return manifest
+    def sort_key(item: dict[str, object]) -> tuple[int, str, str]:
+        category = str(item["category"])
+        order = CATEGORY_ORDER_INDEX.get(category, len(CATEGORY_ORDER_INDEX) + 1)
+        return (order, category, str(item["path"]))
+
+    handbook_items = [item for item in manifest if item["path"] == "__handbook__"]
+    module_items = sorted((item for item in manifest if item["path"] != "__handbook__"), key=sort_key)
+    return handbook_items + module_items
 
 
 def copy_content() -> None:

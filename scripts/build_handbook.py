@@ -24,6 +24,10 @@ MODULES = [
 
 
 def read_module(path: Path) -> str:
+    if not path.exists():
+        study_path = KB / "study" / path.relative_to(KB)
+        if study_path.exists():
+            path = study_path
     text = path.read_text(encoding="utf-8").strip()
     title = f"\n\n---\n\n<!-- source: {path.relative_to(ROOT)} -->\n\n"
     return title + text + "\n"

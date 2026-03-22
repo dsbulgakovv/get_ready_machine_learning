@@ -196,20 +196,38 @@ def extract_notebook_groups() -> dict[tuple[str, ...], NotebookGroup]:
 
 
 SOURCE_MODULES = {
-    "classic_ml/01_models.md": parse_source_module(KB / "classic_ml" / "01_models.md"),
-    "classic_ml/02_advanced.md": parse_source_module(KB / "classic_ml" / "02_advanced.md"),
-    "recsys/01_handbook.md": parse_source_module(KB / "recsys" / "01_handbook.md"),
-    "deep_learning/01_core.md": parse_source_module(KB / "deep_learning" / "01_core.md"),
-    "nlp_llm/01_handbook.md": parse_source_module(KB / "nlp_llm" / "01_handbook.md"),
-    "cv/01_handbook.md": parse_source_module(KB / "cv" / "01_handbook.md"),
-    "metrics/01_handbook.md": parse_source_module(KB / "metrics" / "01_handbook.md"),
-    "python/01_handbook.md": parse_source_module(KB / "python" / "01_handbook.md"),
-    "databases/01_handbook.md": parse_source_module(KB / "databases" / "01_handbook.md"),
-    "production/01_handbook.md": parse_source_module(KB / "production" / "01_handbook.md"),
-    "statistics/01_handbook.md": parse_source_module(KB / "statistics" / "01_handbook.md"),
+    rel: parse_source_module(path)
+    for rel, path in {
+        "classic_ml/01_models.md": KB / "classic_ml" / "01_models.md",
+        "classic_ml/02_advanced.md": KB / "classic_ml" / "02_advanced.md",
+        "recsys/01_handbook.md": KB / "recsys" / "01_handbook.md",
+        "deep_learning/01_core.md": KB / "deep_learning" / "01_core.md",
+        "nlp_llm/01_handbook.md": KB / "nlp_llm" / "01_handbook.md",
+        "cv/01_handbook.md": KB / "cv" / "01_handbook.md",
+        "metrics/01_handbook.md": KB / "metrics" / "01_handbook.md",
+        "python/01_handbook.md": KB / "python" / "01_handbook.md",
+        "databases/01_handbook.md": KB / "databases" / "01_handbook.md",
+        "production/01_handbook.md": KB / "production" / "01_handbook.md",
+        "statistics/01_handbook.md": KB / "statistics" / "01_handbook.md",
+    }.items()
+    if path.exists()
 }
 
 NOTEBOOK_GROUPS = extract_notebook_groups()
+
+CATEGORY_ORDER = [
+    "classic_ml",
+    "deep_learning",
+    "nlp_llm",
+    "cv",
+    "recsys",
+    "metrics",
+    "statistics",
+    "python",
+    "production",
+    "databases",
+]
+CATEGORY_ORDER_INDEX = {name: idx for idx, name in enumerate(CATEGORY_ORDER)}
 
 
 MODULE_SPECS = [
@@ -723,6 +741,16 @@ MODULE_SPECS = [
     ),
 ]
 
+
+def module_sort_key(spec: StudyModuleSpec) -> tuple[int, str]:
+    category = spec.output_rel.split("/", 1)[0]
+    order = CATEGORY_ORDER_INDEX.get(category, len(CATEGORY_ORDER_INDEX) + 1)
+    return (order, spec.output_rel)
+
+
+def ordered_module_specs() -> list[StudyModuleSpec]:
+    return sorted(MODULE_SPECS, key=module_sort_key)
+
 QUESTION_ALIAS_TITLES: dict[str, list[str]] = {
     "Где “градиент” в градиентном бустинге и какая целевая переменная у n-ого дерева?": [
         "На что обучается N+1-е дерево в градиентном бустинге?",
@@ -1042,7 +1070,7 @@ def build_readme() -> None:
         "Основные файлы:",
         "",
     ]
-    for spec in MODULE_SPECS:
+    for spec in ordered_module_specs():
         rel = spec.output_rel
         target = STUDY_ROOT / rel
         lines.append(f"- [{rel}]({target.as_posix()})")
@@ -1053,7 +1081,7 @@ def build_readme() -> None:
 
 def build_modules() -> dict[str, int]:
     stats = {"questions": 0, "exact": 0, "matched": 0, "fallback": 0}
-    for spec in MODULE_SPECS:
+    for spec in ordered_module_specs():
         target = STUDY_ROOT / spec.output_rel
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(render_study_module(spec, stats), encoding="utf-8")
@@ -1063,7 +1091,7 @@ def build_modules() -> dict[str, int]:
 def build_handbook() -> None:
     output = STUDY_ROOT / "HANDBOOK.md"
     parts = ["# ML Interview Study Handbook\n"]
-    for spec in MODULE_SPECS:
+    for spec in ordered_module_specs():
         target = STUDY_ROOT / spec.output_rel
         parts.append(f"\n\n---\n\n<!-- source: {target.relative_to(ROOT)} -->\n\n")
         parts.append(target.read_text(encoding="utf-8").strip())

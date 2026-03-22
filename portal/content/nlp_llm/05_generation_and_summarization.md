@@ -16,6 +16,12 @@
 4. обучить seq2seq или decoder-only модель;
 5. валидировать не только по ROUGE, но и по factuality.
 
+Полезно явно добавить выбор постановки:
+
+- `extractive`, если важна максимальная опора на текст;
+- `abstractive`, если нужен более естественный пересказ;
+- long-document summarization с chunking/hierarchical strategy для длинных входов.
+
 - extractive summarization;
 - TextRank;
 - sentence ranking по TF-IDF/BM25;
@@ -37,6 +43,12 @@
 3. выбрать метрики;
 4. обучить seq2seq или decoder-only модель;
 5. валидировать не только по ROUGE, но и по factuality.
+
+Полезно явно добавить выбор постановки:
+
+- `extractive`, если важна максимальная опора на текст;
+- `abstractive`, если нужен более естественный пересказ;
+- long-document summarization с chunking/hierarchical strategy для длинных входов.
 
 </details>
 

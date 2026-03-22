@@ -1,15 +1,27 @@
 const CATEGORY_LABELS = {
   classic_ml: "Classic ML",
-  recsys: "Recsys",
   deep_learning: "Deep Learning",
   nlp_llm: "NLP / LLM",
   cv: "Computer Vision",
+  recsys: "Recsys",
   metrics: "Metrics",
-  python: "Python",
-  databases: "Databases",
-  production: "Production",
   statistics: "Statistics",
+  python: "Python",
+  production: "Production",
+  databases: "Databases",
 };
+const CATEGORY_ORDER = [
+  "classic_ml",
+  "deep_learning",
+  "nlp_llm",
+  "cv",
+  "recsys",
+  "metrics",
+  "statistics",
+  "python",
+  "production",
+  "databases",
+];
 
 const state = {
   modules: [],
@@ -26,6 +38,7 @@ const els = {
   closeSidebar: document.getElementById("close-sidebar"),
   moduleNav: document.getElementById("module-nav"),
   moduleGrid: document.getElementById("module-grid"),
+  learningRoute: document.getElementById("learning-route"),
   search: document.getElementById("module-search"),
   homePanel: document.getElementById("home-panel"),
   readerPanel: document.getElementById("reader-panel"),
@@ -36,6 +49,8 @@ const els = {
   continueButton: document.getElementById("continue-button"),
   installApp: document.getElementById("install-app"),
   openHandbook: document.getElementById("open-handbook"),
+  openHandbookHome: document.getElementById("open-handbook-home"),
+  startLearning: document.getElementById("start-learning"),
   backHome: document.getElementById("back-home"),
   copyLink: document.getElementById("copy-link"),
   expandAll: document.getElementById("expand-all"),
@@ -63,6 +78,15 @@ function setHashPath(path) {
 
 function humanCategory(category) {
   return CATEGORY_LABELS[category] || category;
+}
+
+function pluralize(value, one, few, many) {
+  const n = Math.abs(value) % 100;
+  const n1 = n % 10;
+  if (n > 10 && n < 20) return many;
+  if (n1 > 1 && n1 < 5) return few;
+  if (n1 === 1) return one;
+  return many;
 }
 
 function closeSidebarOnMobile() {
@@ -100,27 +124,32 @@ function applySearch() {
 }
 
 function groupModules(modules) {
-  const groups = new Map();
+  const grouped = new Map();
   for (const module of modules) {
     const key = module.category;
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(module);
+    if (!grouped.has(key)) grouped.set(key, []);
+    grouped.get(key).push(module);
   }
-  return groups;
+
+  return CATEGORY_ORDER.filter((category) => grouped.has(category)).map((category) => ({
+    category,
+    modules: grouped.get(category),
+  }));
 }
 
 function renderSidebar() {
   const groups = groupModules(state.filtered);
   const fragments = [];
 
-  for (const [category, modules] of groups.entries()) {
+  for (const group of groups) {
+    const { category, modules } = group;
     const items = modules
       .map((module) => {
         const active = module.path === state.currentPath ? " is-active" : "";
         return `
           <button class="module-link${active}" data-open-module="${module.path}" type="button">
             <strong>${module.title}</strong>
-            <span>${module.questionCount} вопросов</span>
+            <span>${module.questionCount} ${pluralize(module.questionCount, "вопрос", "вопроса", "вопросов")}</span>
           </button>
         `;
       })
@@ -142,26 +171,59 @@ function renderSidebar() {
   els.moduleNav.innerHTML = fragments.join("");
 }
 
+function renderLearningRoute() {
+  const groups = groupModules(state.modules.filter((item) => item.path !== "__handbook__"));
+  els.learningRoute.innerHTML = groups
+    .map((group, index) => {
+      const firstModule = group.modules[0];
+      return `
+        <button class="route-card" data-open-module="${firstModule.path}" type="button">
+          <span class="route-card__step">Шаг ${index + 1}</span>
+          <strong>${humanCategory(group.category)}</strong>
+          <span>${group.modules.length} ${pluralize(group.modules.length, "модуль", "модуля", "модулей")}</span>
+        </button>
+      `;
+    })
+    .join("");
+}
+
 function renderModuleGrid() {
   if (!state.filtered.length) {
     els.moduleGrid.innerHTML = `<div class="tip-card"><h3>Ничего не найдено</h3><p>Попробуй другой запрос или очисти поиск.</p></div>`;
     return;
   }
 
-  els.moduleGrid.innerHTML = state.filtered
-    .map(
-      (module) => `
-        <button class="module-card" data-open-module="${module.path}" type="button">
-          <div class="module-card__meta">
-            <span>${module.categoryLabel}</span>
-            <span>${module.questionCount} вопросов</span>
+  const groups = groupModules(state.filtered);
+  els.moduleGrid.innerHTML = groups
+    .map((group) => {
+      const cards = group.modules
+        .map(
+          (module) => `
+            <button class="module-card" data-open-module="${module.path}" type="button">
+              <div class="module-card__meta">
+                <span>${module.categoryLabel}</span>
+                <span>${module.questionCount} ${pluralize(module.questionCount, "вопрос", "вопроса", "вопросов")}</span>
+              </div>
+              <h4>${module.title}</h4>
+              <p class="module-card__summary">${module.summary}</p>
+              <p class="module-card__footer">Открыть модуль</p>
+            </button>
+          `
+        )
+        .join("");
+
+      return `
+        <section class="module-section">
+          <div class="module-section__header">
+            <p class="eyebrow">Раздел</p>
+            <h3>${humanCategory(group.category)}</h3>
           </div>
-          <h4>${module.title}</h4>
-          <p class="module-card__summary">${module.summary}</p>
-          <p class="module-card__footer">Открыть модуль</p>
-        </button>
-      `
-    )
+          <div class="module-section__grid">
+            ${cards}
+          </div>
+        </section>
+      `;
+    })
     .join("");
 }
 
@@ -240,8 +302,11 @@ function updateTopbar(module) {
     els.topbarMeta.textContent = "";
     return;
   }
+  const modulesOnly = state.modules.filter((item) => item.path !== "__handbook__");
+  const position = modulesOnly.findIndex((item) => item.path === module.path);
+  const routeMeta = position >= 0 ? `Модуль ${position + 1} из ${modulesOnly.length}` : "Общий режим";
   els.topbarTitle.textContent = module.title;
-  els.topbarMeta.textContent = `${module.categoryLabel} · ${module.questionCount} вопросов`;
+  els.topbarMeta.textContent = `${module.categoryLabel} · ${module.questionCount} ${pluralize(module.questionCount, "вопрос", "вопроса", "вопросов")} · ${routeMeta}`;
 }
 
 function revealReaderMode(module) {
@@ -289,7 +354,7 @@ async function loadModule(path) {
   toggleContinueButton();
   renderSidebar();
 
-  const response = await fetch(`./content/${path}`);
+  const response = await fetch(`./content/${module.sourcePath}`);
   if (!response.ok) {
     els.articleContent.innerHTML = `<div class="tip-card"><h3>Не удалось загрузить модуль</h3><p>Проверь, что сайт собран полностью и файл существует.</p></div>`;
     revealReaderMode(module);
@@ -364,6 +429,10 @@ function attachUiHandlers() {
   els.continueButton.addEventListener("click", () => {
     if (state.lastOpened) setHashPath(state.lastOpened);
   });
+  els.startLearning.addEventListener("click", () => {
+    const firstModule = state.modules.find((item) => item.path !== "__handbook__");
+    if (firstModule) setHashPath(firstModule.path);
+  });
   els.installApp.addEventListener("click", async () => {
     if (!state.deferredInstallPrompt) return;
     state.deferredInstallPrompt.prompt();
@@ -372,6 +441,9 @@ function attachUiHandlers() {
     toggleInstallButton();
   });
   els.openHandbook.addEventListener("click", () => {
+    setHashPath("__handbook__");
+  });
+  els.openHandbookHome.addEventListener("click", () => {
     setHashPath("__handbook__");
   });
   els.copyLink.addEventListener("click", async () => {
@@ -423,6 +495,7 @@ async function init() {
   toggleContinueButton();
   toggleInstallButton();
   renderSidebar();
+  renderLearningRoute();
   renderModuleGrid();
   attachUiHandlers();
   registerServiceWorker();
