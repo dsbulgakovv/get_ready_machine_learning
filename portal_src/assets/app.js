@@ -341,6 +341,101 @@ async function renderMath() {
   }
 }
 
+function bindDetailsMathRendering() {
+  els.articleContent.querySelectorAll("details").forEach((item) => {
+    item.addEventListener("toggle", () => {
+      if (!item.open || !window.MathJax?.typesetPromise) {
+        return;
+      }
+      window.MathJax.typesetPromise([item]).catch((error) => {
+        console.error("MathJax details rendering failed", error);
+      });
+    });
+  });
+}
+
+function escapeHtml(text) {
+  return text
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function normalizeMathDelimiters(markdown) {
+  const fencedCodePattern = /(```[\s\S]*?```)/g;
+
+  return markdown
+    .split(fencedCodePattern)
+    .map((chunk, index) => {
+      if (index % 2 === 1) {
+        return chunk;
+      }
+
+      return chunk
+        .replace(/\\\[((?:.|\n)*?)\\\]/g, (_, expression) => `\n$$\n${expression.trim()}\n$$\n`)
+        .replace(/\\\((.+?)\\\)/g, (_, expression) => `$${expression.trim()}$`);
+    })
+    .join("");
+}
+
+function renderMarkdown(markdown) {
+  return window.marked.parse(normalizeMathDelimiters(markdown), {
+    gfm: true,
+    breaks: false,
+    headerIds: false,
+    mangle: false,
+  });
+}
+
+function preprocessDetailsMarkdown(markdown) {
+  const detailsPattern = /<details>\s*<summary>([\s\S]*?)<\/summary>\s*([\s\S]*?)<\/details>/g;
+
+  return markdown.replace(detailsPattern, (_, rawSummary, rawBody) => {
+    const summary = escapeHtml(rawSummary.trim());
+    const body = rawBody.trim();
+    const bodyHtml = body ? renderMarkdown(body).trim() : "";
+
+    return [
+      "<details>",
+      `<summary>${summary}</summary>`,
+      '<div class="details-content">',
+      bodyHtml,
+      "</div>",
+      "</details>",
+    ].join("\n");
+  });
+}
+
+async function fetchMarkdownBySourcePath(sourcePath) {
+  const response = await fetch(`./content/${sourcePath}`);
+  if (!response.ok) {
+    return null;
+  }
+  return response.text();
+}
+
+async function buildHandbookFromModules() {
+  const modules = state.modules.filter((item) => item.path !== "__handbook__");
+  const sections = ["# ML Interview Study Handbook"];
+
+  for (const module of modules) {
+    const markdown = await fetchMarkdownBySourcePath(module.sourcePath);
+    if (!markdown) {
+      continue;
+    }
+    sections.push("");
+    sections.push("---");
+    sections.push("");
+    sections.push(`<!-- source: ${module.sourcePath} -->`);
+    sections.push("");
+    sections.push(markdown.trim());
+  }
+
+  return sections.join("\n");
+}
+
 async function loadModule(path) {
   const module = state.modules.find((item) => item.path === path);
   if (!module) {
@@ -354,24 +449,24 @@ async function loadModule(path) {
   toggleContinueButton();
   renderSidebar();
 
-  const response = await fetch(`./content/${module.sourcePath}`);
-  if (!response.ok) {
+  let markdown = await fetchMarkdownBySourcePath(module.sourcePath);
+
+  if (!markdown && module.path === "__handbook__") {
+    markdown = await buildHandbookFromModules();
+  }
+
+  if (!markdown) {
     els.articleContent.innerHTML = `<div class="tip-card"><h3>Не удалось загрузить модуль</h3><p>Проверь, что сайт собран полностью и файл существует.</p></div>`;
     revealReaderMode(module);
     return;
   }
 
-  const markdown = await response.text();
-  const html = window.marked.parse(markdown, {
-    gfm: true,
-    breaks: false,
-    headerIds: false,
-    mangle: false,
-  });
+  const html = renderMarkdown(preprocessDetailsMarkdown(markdown));
 
   els.articleContent.innerHTML = html;
   rewriteLocalLinks(els.articleContent);
   buildToc(els.articleContent);
+  bindDetailsMathRendering();
   await renderMath();
   revealReaderMode(module);
   closeSidebarOnMobile();

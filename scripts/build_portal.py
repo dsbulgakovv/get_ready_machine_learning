@@ -164,9 +164,28 @@ def collect_precache_urls(manifest: list[dict[str, object]]) -> list[str]:
     return unique_urls
 
 
+def precache_version_seed(urls: list[str]) -> str:
+    parts: list[str] = []
+
+    for url in urls:
+        if url == "./":
+            path = PORTAL_OUT / "index.html"
+        else:
+            path = PORTAL_OUT / url.removeprefix("./")
+
+        if path.exists():
+            digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        else:
+            digest = "missing"
+
+        parts.append(f"{url}:{digest}")
+
+    return "\n".join(parts)
+
+
 def write_service_worker(manifest: list[dict[str, object]]) -> None:
     precache_urls = collect_precache_urls(manifest)
-    version_seed = "\n".join(precache_urls)
+    version_seed = precache_version_seed(precache_urls)
     cache_name = f"ml-portal-{hashlib.sha256(version_seed.encode('utf-8')).hexdigest()[:12]}"
 
     script = f"""const CACHE_NAME = "{cache_name}";
