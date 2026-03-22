@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ML Interview Portal</title>
+    <meta name="theme-color" content="#f4efe7" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="ML Portal" />
+    <meta
+      name="description"
+      content="Портал для повторения ML/MLE интервью-вопросов: теория, раскрывающиеся ответы, модули, удобный режим для телефона и компьютера."
+    />
+    <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="./site.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Source+Serif+4:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [
+            ["$", "$"],
+            ["\\(", "\\)"],
+          ],
+          displayMath: [
+            ["$$", "$$"],
+            ["\\[", "\\]"],
+          ],
+        },
+        svg: {
+          fontCache: "global",
+        },
+      };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script defer src="./assets/app.js"></script>
+  </head>
+  <body>
+    <div class="page-shell">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar__header">
+          <div>
+            <p class="eyebrow">Study Portal</p>
+            <h1>ML Interview</h1>
+          </div>
+          <button class="ghost-btn mobile-only" id="close-sidebar" type="button">Закрыть</button>
+        </div>
+
+        <div class="sidebar__search">
+          <label class="search-box">
+            <span class="search-box__label">Поиск по модулям</span>
+            <input id="module-search" type="search" placeholder="Например: RAG, SVM, метрики" />
+          </label>
+        </div>
+
+        <div class="sidebar__actions">
+          <button class="pill-btn" id="continue-button" type="button" hidden>Продолжить с последнего</button>
+          <button class="ghost-btn" id="install-app" type="button" hidden>Установить</button>
+          <button class="ghost-btn" id="open-handbook" type="button">Открыть handbook</button>
+        </div>
+
+        <nav class="module-nav" id="module-nav" aria-label="Модули"></nav>
+      </aside>
+
+      <div class="main-column">
+        <header class="topbar">
+          <button class="ghost-btn mobile-only" id="open-sidebar" type="button">Модули</button>
+          <div class="topbar__title">
+            <p class="eyebrow">Повторение с телефона и компьютера</p>
+            <strong id="topbar-title">Выбери модуль</strong>
+          </div>
+          <div class="topbar__meta" id="topbar-meta"></div>
+        </header>
+
+        <main class="content-area">
+          <section class="home-panel" id="home-panel">
+            <div class="hero-card">
+              <p class="eyebrow">Лучший режим повторения</p>
+              <h2>Сначала теория, потом твои вопросы из ноутбука</h2>
+              <p>
+                Здесь каждый модуль адаптирован под повторение: сверху учебник, ниже блок
+                <code>Вопросы из ноутбука</code> с раскрывающимися ответами.
+              </p>
+
+              <div class="hero-card__list">
+                <div class="hero-badge">Телефон-friendly</div>
+                <div class="hero-badge">Оглавление</div>
+                <div class="hero-badge">Быстрый поиск</div>
+                <div class="hero-badge">Ссылки на конкретный модуль</div>
+              </div>
+            </div>
+
+            <section class="quick-tips">
+              <div class="tip-card">
+                <h3>Как повторять</h3>
+                <p>Открывай модуль, читай учебник, потом прокликивай вопросы внизу и отвечай до раскрытия.</p>
+              </div>
+              <div class="tip-card">
+                <h3>С телефона</h3>
+                <p>Лучше открывать отдельный модуль по ссылке и добавлять сайт в закладки или на главный экран.</p>
+              </div>
+              <div class="tip-card">
+                <h3>С ноутбука</h3>
+                <p>Удобнее идти по большим темам и держать открытым поиск по модулям в левой панели.</p>
+              </div>
+              <div class="tip-card">
+                <h3>Как поставить на экран</h3>
+                <p>На Android и desktop Chrome появится кнопка установки. На iPhone открой сайт в Safari и добавь его на экран “Домой”.</p>
+              </div>
+            </section>
+
+            <section>
+              <div class="section-header">
+                <div>
+                  <p class="eyebrow">Быстрый старт</p>
+                  <h3>Все модули</h3>
+                </div>
+                <p class="section-header__note">Карточки ниже открывают отдельные модули портала.</p>
+              </div>
+
+              <div class="module-grid" id="module-grid"></div>
+            </section>
+          </section>
+
+          <section class="reader-panel is-hidden" id="reader-panel">
+            <div class="reader-toolbar">
+              <div class="reader-toolbar__left">
+                <button class="ghost-btn" id="back-home" type="button">Ко всем модулям</button>
+                <button class="ghost-btn" id="copy-link" type="button">Скопировать ссылку</button>
+              </div>
+              <div class="reader-toolbar__right">
+                <button class="ghost-btn" id="expand-all" type="button">Раскрыть все ответы</button>
+                <button class="ghost-btn" id="collapse-all" type="button">Свернуть ответы</button>
+              </div>
+            </div>
+
+            <div class="reader-layout">
+              <article class="article-card">
+                <div id="article-content" class="markdown-body"></div>
+              </article>
+              <aside class="article-toc">
+                <div class="article-toc__card">
+                  <p class="eyebrow">Навигация</p>
+                  <h3>Оглавление модуля</h3>
+                  <nav id="article-toc"></nav>
+                </div>
+              </aside>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>
