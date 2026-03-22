@@ -656,7 +656,7 @@ MODULE_SPECS = [
     StudyModuleSpec(
         output_rel="python/01_handbook.md",
         title="Python Handbook for ML Engineer Interviews",
-        intro="Python-модуль пока оставляю цельным, потому что вопросы из ноутбука уже перемешивают язык, память, concurrency и задачки. В конце собраны точные вопросы из ноутбука по исходным формулировкам.",
+        intro="Python-модуль объединяет язык, модель памяти, concurrency и типовые coding questions. В конце собраны точные вопросы из ноутбука по исходным формулировкам.",
         theory_sections=[
             TheorySectionSpec("python/01_handbook.md", "База языка"),
             TheorySectionSpec("python/01_handbook.md", "Функции, декораторы, контекстные менеджеры"),

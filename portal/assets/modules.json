@@ -173,7 +173,7 @@
     "path": "python/01_handbook.md",
     "sourcePath": "python/01_handbook.md",
     "title": "Python Handbook for ML Engineer Interviews",
-    "summary": "Python-модуль пока оставляю цельным, потому что вопросы из ноутбука уже перемешивают язык, память, concurrency и задачки. В конце собраны точные вопросы из ноутбука по исходным формулировкам.",
+    "summary": "Python-модуль объединяет язык, модель памяти, concurrency и типовые coding questions. В конце собраны точные вопросы из ноутбука по исходным формулировкам.",
     "category": "python",
     "categoryLabel": "Python",
     "questionCount": 67,
