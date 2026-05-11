@@ -1,0 +1,104 @@
+@startuml
+title Team and Lead Ownership — Lean Delivery Model
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 18
+skinparam defaultFontName Inter
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+
+center header
+Lead DS should own framing, trade-offs, interfaces, quality bar and business impact,
+not become a bottleneck for every implementation detail.
+endheader
+
+rectangle "Lead / owner of initiative" as Lead #FEE2E2
+
+package "1. Align business goal" #DBEAFE {
+  rectangle "Stakeholders\nbusiness owner, product, operations" as B1
+  rectangle "Definition of success\nbusiness metric + product metric + guardrails" as B2
+  rectangle "Scope and non-goals\nwhat is MVP, what is later" as B3
+}
+
+package "2. Decompose workstreams" #FEF9C3 {
+  rectangle "Product / Analytics stream\n\nmetric tree, dashboard,\nA/B design, interpretation" as S1
+  rectangle "Data Engineering stream\n\ndata sources, ETL,\nfeature pipelines, data quality" as S2
+  rectangle "ML / DS stream\n\nbaseline, features, model,\noffline validation" as S3
+  rectangle "Backend / Integration stream\n\nAPI, product integration,\ndecision engine, fallback" as S4
+  rectangle "MLOps / Platform stream\n\nserving, registry, CI/CD,\nmonitoring, retraining" as S5
+  rectangle "QA / Risk / Legal stream\n\ntest scenarios, privacy,\nsafety, edge cases" as S6
+}
+
+package "3. Decision framework" #DCFCE7 {
+  rectangle "Design doc" as D1
+  rectangle "Architecture review" as D2
+  rectangle "Experiment review" as D3
+  rectangle "Launch checklist" as D4
+  rectangle "Rollback criteria" as D5
+}
+
+package "4. Risk management" #FFEDD5 {
+  rectangle "Business risks\nwrong metric, cannibalization, no ROI" as R1
+  rectangle "Data risks\nleakage, bias, label delay, bad logging" as R2
+  rectangle "Model risks\ndrift, poor calibration, segment degradation" as R3
+  rectangle "System risks\nlatency, downtime, cost, scaling" as R4
+  rectangle "Org risks\nunclear ownership, dependencies, overengineering" as R5
+}
+
+package "5. Keep team lean" #F3E8FF {
+  rectangle "Use MVP first" as L1
+  rectangle "Reuse existing platform and shared services" as L2
+  rectangle "One owner per stream,\nnot one person per task" as L3
+  rectangle "Automate repeatable work" as L4
+  rectangle "Human-in-the-loop only\nwhere risk is high" as L5
+  rectangle "Scale team only after\nbusiness value is proven" as L6
+}
+
+package "Expected lead behavior" #FEE2E2 {
+  rectangle "Lead does not do everything personally" as E1
+  rectangle "Lead owns problem framing,\ntrade-offs, interfaces and quality bar" as E2
+  rectangle "Lead keeps the project moving\nunder uncertainty" as E3
+  rectangle "Lead communicates impact to business\nand details to engineers" as E4
+}
+
+Lead --> B1
+Lead --> B2
+Lead --> B3
+
+Lead --> S1
+Lead --> S2
+Lead --> S3
+Lead --> S4
+Lead --> S5
+Lead --> S6
+
+Lead --> D1
+D1 --> D2
+D2 --> D3
+D3 --> D4
+D4 --> D5
+
+Lead --> R1
+Lead --> R2
+Lead --> R3
+Lead --> R4
+Lead --> R5
+
+Lead --> L1
+Lead --> L2
+Lead --> L3
+Lead --> L4
+Lead --> L5
+Lead --> L6
+
+B2 --> E2
+D1 --> E2
+R1 --> E3
+L1 --> E1
+L2 --> E3
+E1 --> E4
+E2 --> E4
+E3 --> E4
+
+@enduml

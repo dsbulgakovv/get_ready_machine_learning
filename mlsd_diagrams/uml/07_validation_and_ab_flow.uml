@@ -1,0 +1,98 @@
+@startuml
+title Model Validation and A/B Test Flow
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 18
+skinparam defaultFontName Inter
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+
+start
+
+partition "Offline validation" #FFEDD5 {
+  :Model candidate is ready;
+  :Correct split;
+  note right
+    time / user / group split
+    no leakage
+  end note
+
+  :ML metrics;
+  note right
+    AUC, PR-AUC, F1,
+    NDCG, MAE, WAPE,
+    calibration
+  end note
+
+  :Business proxy;
+  note right
+    expected profit,
+    saved cost,
+    predicted uplift
+  end note
+
+  :Segment analysis;
+  note right
+    regions, devices,
+    user cohorts,
+    high-value users
+  end note
+}
+
+if ("Offline quality good enough?") then ("No")
+  :Iterate data, features,\ntarget, model, threshold;
+else ("Yes")
+endif
+
+partition "Pre-production validation" #E2E8F0 {
+  :Backtest if historical data;
+  :Shadow mode if online decision;
+  :Manual review if high-risk;
+  :A/A test or logging validation;
+}
+
+if ("Ready for A/B?") then ("No")
+  :Fix validation blockers;
+else ("Yes")
+endif
+
+partition "A/B test design" #DCFCE7 {
+  :Hypothesis;
+  :Primary metric;
+  :Guardrails;
+  :Unit of randomization;
+  note right
+    user, session, geo,
+    seller, courier,
+    time bucket
+  end note
+  :MDE / power / sample size;
+  :Duration and stopping rules;
+}
+
+partition "Run experiment" #DBEAFE {
+  :Check SRM;
+  :Check logging;
+  :Check overlap / contamination;
+  :Monitor guardrails;
+}
+
+partition "Analyze results" #FEF9C3 {
+  :Statistical significance;
+  :Practical significance;
+  :Confidence intervals;
+  :Segment stability;
+  :Business impact and cost;
+}
+
+if ("Decision") then ("Ship")
+  :Gradual rollout\n5% → 25% → 50% → 100%;
+elseif ("Iterate")
+  :Iterate;
+else ("Rollback")
+  :Rollback and postmortem;
+endif
+
+stop
+@enduml

@@ -1,0 +1,36 @@
+@startuml
+title Senior Answer Loop — One-Line Mental Model
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 20
+skinparam defaultFontName Inter
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam ArrowThickness 1.5
+
+left to right direction
+
+rectangle "Business\n\nWhat value?" as A #DBEAFE
+rectangle "Metrics\n\nHow measure?" as B #DCFCE7
+rectangle "Data\n\nCan we trust data?" as C #FEF9C3
+rectangle "Model\n\nBaseline first" as D #F3E8FF
+rectangle "Validation\n\nOffline + segments" as E #FFEDD5
+rectangle "Production\n\nBatch / online / hybrid" as F #E2E8F0
+rectangle "Experiment\n\nA/B + guardrails" as G #FFEDD5
+rectangle "Monitoring\n\nDrift + latency + business" as H #E2E8F0
+rectangle "Team\n\nOwners + lean team" as I #FEE2E2
+rectangle "Business impact\n\nROI + rollout" as J #DBEAFE
+
+A --> B
+B --> C
+C --> D
+D --> E
+E --> F
+F --> G
+G --> H
+H --> I
+I --> J
+J --> A
+
+@enduml

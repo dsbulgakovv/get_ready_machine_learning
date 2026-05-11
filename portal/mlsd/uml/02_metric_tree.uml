@@ -1,0 +1,118 @@
+@startmindmap
+title Metric Tree — Business → Product → ML → Guardrails → Decision
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Inter
+skinparam defaultFontSize 13
+skinparam shadowing false
+
+<style>
+mindmapDiagram {
+  node {
+    BackgroundColor #F8FAFC
+    LineColor #334155
+    FontColor #0F172A
+  }
+  :depth(1) {
+    BackgroundColor #DBEAFE
+    LineColor #2563EB
+  }
+  :depth(2) {
+    BackgroundColor #DCFCE7
+    LineColor #16A34A
+  }
+  :depth(3) {
+    BackgroundColor #FEF9C3
+    LineColor #CA8A04
+  }
+}
+</style>
+
+* Metric Tree
+** Business / North Star
+*** Revenue / GMV
+*** Margin / profit
+*** Retention / churn
+*** Cost reduction
+*** SLA / quality of service
+*** NPS / CSAT
+** Product metrics
+*** CTR
+*** CVR
+*** Activation
+*** Frequency
+*** Time to value
+*** Funnel conversion
+*** Complaint / refund / cancellation rate
+** ML metrics
+*** Classification
+**** ROC-AUC
+**** PR-AUC
+**** Precision@K
+**** Recall@K
+**** F1
+**** LogLoss
+**** Calibration
+*** Regression
+**** MAE
+**** RMSE
+**** WAPE
+**** MAPE
+**** Bias
+**** Quantile loss
+*** Ranking
+**** NDCG@K
+**** MAP@K
+**** MRR
+**** Recall@K
+**** Coverage
+**** Diversity
+*** Forecasting
+**** WAPE
+**** sMAPE
+**** Bias
+**** Backtest error
+**** Stockout / overstock
+*** NLP / LLM / RAG
+**** Retrieval Recall@K
+**** Groundedness
+**** Hallucination rate
+**** Human eval
+**** Cost
+*** CV
+**** F1
+**** mAP
+**** IoU
+**** OCR CER/WER
+**** Manual review reduction
+** Guardrails
+*** Latency
+*** Error rate
+*** Infra cost
+*** Fairness / segment degradation
+*** Privacy / safety
+*** Long-term retention
+*** User complaints
+** Operational / system metrics
+*** p50 / p95 / p99 latency
+*** Throughput / RPS
+*** CPU / GPU utilization
+*** Queue lag
+*** Availability
+*** Cost per prediction
+** Diagnostic metrics
+*** Data freshness
+*** Missing rate
+*** Feature drift
+*** Score distribution drift
+*** Train-serving skew
+*** Label delay
+*** Quality by segment
+** Decision logic
+*** Ship if business metric improves
+*** Guardrails are stable
+*** Effect is practically significant
+*** Segments do not degrade
+*** Cost is acceptable
+
+@endmindmap

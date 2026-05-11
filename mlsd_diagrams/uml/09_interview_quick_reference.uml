@@ -1,0 +1,116 @@
+@startuml
+title Interview Quick Reference — From Task to Business Impact
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 18
+skinparam defaultFontName Inter
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+
+top to bottom direction
+
+rectangle "Задача" as A #DBEAFE
+rectangle "Уточняю бизнес" as B #DBEAFE
+rectangle "Фиксирую цель" as C #DBEAFE
+rectangle "Строю дерево метрик" as D #DCFCE7
+rectangle "Формулирую ML-задачу" as E #F3E8FF
+rectangle "Проверяю данные" as F #FEF9C3
+rectangle "Делаю baseline" as G #F3E8FF
+rectangle "Предлагаю advanced approach" as H #F3E8FF
+rectangle "Валидирую offline" as I #FFEDD5
+rectangle "Проектирую production" as J #E2E8F0
+rectangle "Планирую A/B" as K #FFEDD5
+rectangle "Мониторинг и rollout" as L #E2E8F0
+rectangle "Команда и ownership" as M #FEE2E2
+rectangle "Итог: business impact" as N #DBEAFE
+
+A --> B
+B --> C
+C --> D
+D --> E
+E --> F
+F --> G
+G --> H
+H --> I
+I --> J
+J --> K
+K --> L
+L --> M
+M --> N
+
+note right of B
+Пользователь,
+бизнес-цель,
+ограничения,
+цена ошибки
+end note
+
+note right of D
+Business:
+revenue, margin,
+retention, cost, SLA
+
+Product:
+CTR, CVR, churn,
+activation, frequency
+
+ML:
+AUC, PR-AUC,
+NDCG, MAE, calibration
+
+Guardrails:
+latency, complaints,
+errors, fairness, cost
+end note
+
+note right of F
+Sources, target,
+leakage, freshness,
+label delay
+end note
+
+note right of G
+Rules / SQL /
+simple ML
+end note
+
+note right of H
+GBDT / ranking /
+NLP / CV / LLM /
+uplift / optimization
+end note
+
+note right of I
+Split, offline metrics,
+segments, business proxy
+end note
+
+note right of J
+Batch vs online vs hybrid,
+API, DB, cache,
+Kafka, feature store
+end note
+
+note right of K
+Hypothesis,
+primary metric,
+guardrails,
+randomization,
+MDE, SRM
+end note
+
+note right of L
+Shadow, staged rollout,
+rollback criteria,
+monitoring
+end note
+
+note right of M
+Lead:
+goal, trade-offs,
+design review,
+owners, lean team
+end note
+
+@enduml

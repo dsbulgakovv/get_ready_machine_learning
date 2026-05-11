@@ -1,0 +1,78 @@
+@startuml
+title 60-Minute Interview Answer Timeline
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 18
+skinparam defaultFontName Inter
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+
+left to right direction
+
+rectangle "0–5 min\nClarify" as T1 #DBEAFE
+rectangle "5–10 min\nBusiness goal\nand metrics" as T2 #DCFCE7
+rectangle "10–20 min\nData and ML\nformulation" as T3 #FEF9C3
+rectangle "20–30 min\nBaseline and\nadvanced model" as T4 #F3E8FF
+rectangle "30–40 min\nProduction\narchitecture" as T5 #E2E8F0
+rectangle "40–48 min\nValidation\nand A/B" as T6 #FFEDD5
+rectangle "48–55 min\nTeam plan\nand risks" as T7 #FEE2E2
+rectangle "55–60 min\nSummary and\ntrade-offs" as T8 #DBEAFE
+
+note bottom of T1
+Ask about:
+users, goal, constraints,
+latency, error cost
+end note
+
+note bottom of T2
+North Star,
+product metrics,
+ML metrics,
+guardrails
+end note
+
+note bottom of T3
+Sources, target,
+features, leakage,
+label delay
+end note
+
+note bottom of T4
+Simple baseline first,
+then better model
+if ROI exists
+end note
+
+note bottom of T5
+Batch vs online vs hybrid,
+storage, API, cache,
+queue, monitoring
+end note
+
+note bottom of T6
+Offline validation,
+shadow mode, A/B,
+rollout, rollback
+end note
+
+note bottom of T7
+Streams, owners,
+MVP, dependencies,
+lean team
+end note
+
+note bottom of T8
+Tie everything back
+to business result
+end note
+
+T1 --> T2
+T2 --> T3
+T3 --> T4
+T4 --> T5
+T5 --> T6
+T6 --> T7
+T7 --> T8
+
+@enduml

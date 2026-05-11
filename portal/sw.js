@@ -1,4 +1,4 @@
-const CACHE_NAME = "ml-portal-a4b0288f4c94";
+const CACHE_NAME = "ml-portal-f63d64689184";
 const PRECACHE_URLS = [
   "./",
   "./assets/app.js",
@@ -26,6 +26,25 @@ const PRECACHE_URLS = [
   "./content/recsys/01_handbook.md",
   "./content/statistics/01_handbook.md",
   "./index.html",
+  "./mlsd/manifest.json",
+  "./mlsd/notes/01_universal_answer_flow.md",
+  "./mlsd/notes/02_metric_tree.md",
+  "./mlsd/notes/03_domain_decision_map.md",
+  "./mlsd/notes/04_production_architecture.md",
+  "./mlsd/notes/05_team_and_lead_ownership.md",
+  "./mlsd/notes/06_sixty_minute_timeline.md",
+  "./mlsd/notes/07_validation_and_ab_flow.md",
+  "./mlsd/notes/08_senior_answer_loop.md",
+  "./mlsd/notes/09_interview_quick_reference.md",
+  "./mlsd/uml/01_universal_answer_flow.uml",
+  "./mlsd/uml/02_metric_tree.uml",
+  "./mlsd/uml/03_domain_decision_map.uml",
+  "./mlsd/uml/04_production_architecture.uml",
+  "./mlsd/uml/05_team_and_lead_ownership.uml",
+  "./mlsd/uml/06_sixty_minute_timeline.uml",
+  "./mlsd/uml/07_validation_and_ab_flow.uml",
+  "./mlsd/uml/08_senior_answer_loop.uml",
+  "./mlsd/uml/09_interview_quick_reference.uml",
   "./site.webmanifest"
 ];
 

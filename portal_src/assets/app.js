@@ -22,12 +22,19 @@ const CATEGORY_ORDER = [
   "production",
   "databases",
 ];
+const MLSD_ROUTE = "mlsd";
+const PLANTUML_SERVER = "https://www.plantuml.com/plantuml/svg/";
+const PLANTUML_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_";
 
 const state = {
+  mode: "study",
   modules: [],
   filtered: [],
+  diagrams: [],
+  filteredDiagrams: [],
   currentPath: null,
   currentModule: null,
+  currentDiagramSlug: null,
   lastOpened: localStorage.getItem("ml-portal-last-opened"),
   deferredInstallPrompt: null,
 };
@@ -40,8 +47,14 @@ const els = {
   moduleGrid: document.getElementById("module-grid"),
   learningRoute: document.getElementById("learning-route"),
   search: document.getElementById("module-search"),
+  searchLabel: document.querySelector(".search-box__label"),
+  studyTab: document.getElementById("study-tab"),
+  mlsdTab: document.getElementById("mlsd-tab"),
+  studyActions: document.getElementById("study-actions"),
   homePanel: document.getElementById("home-panel"),
   readerPanel: document.getElementById("reader-panel"),
+  mlsdPanel: document.getElementById("mlsd-panel"),
+  mlsdContent: document.getElementById("mlsd-content"),
   articleContent: document.getElementById("article-content"),
   articleToc: document.getElementById("article-toc"),
   topbarTitle: document.getElementById("topbar-title"),
@@ -50,6 +63,7 @@ const els = {
   installApp: document.getElementById("install-app"),
   openHandbook: document.getElementById("open-handbook"),
   openHandbookHome: document.getElementById("open-handbook-home"),
+  openMlsdHome: document.getElementById("open-mlsd-home"),
   startLearning: document.getElementById("start-learning"),
   backHome: document.getElementById("back-home"),
   copyLink: document.getElementById("copy-link"),
@@ -78,6 +92,14 @@ function setHashPath(path) {
 
 function humanCategory(category) {
   return CATEGORY_LABELS[category] || category;
+}
+
+function isMlsdPath(path) {
+  return path === MLSD_ROUTE || path.startsWith(`${MLSD_ROUTE}/`);
+}
+
+function getMlsdPath(slug) {
+  return slug ? `${MLSD_ROUTE}/${slug}` : MLSD_ROUTE;
 }
 
 function pluralize(value, one, few, many) {
@@ -116,8 +138,30 @@ function matchesSearch(module, query) {
   return haystack.includes(query.toLowerCase());
 }
 
+function matchesDiagram(diagram, query) {
+  if (!query) return true;
+  const terms = (diagram.terms || []).flatMap((term) => [term.name, term.definition]);
+  const haystack = [
+    diagram.title,
+    diagram.sourceHeading,
+    diagram.summary,
+    diagram.interviewAnswer,
+    ...(diagram.talkTrack || []),
+    ...terms,
+  ]
+    .join(" ")
+    .toLowerCase();
+  return haystack.includes(query.toLowerCase());
+}
+
 function applySearch() {
   const query = els.search.value.trim();
+  if (state.mode === "mlsd") {
+    state.filteredDiagrams = state.diagrams.filter((diagram) => matchesDiagram(diagram, query));
+    renderSidebar();
+    return;
+  }
+
   state.filtered = state.modules.filter((module) => matchesSearch(module, query));
   renderSidebar();
   renderModuleGrid();
@@ -138,6 +182,11 @@ function groupModules(modules) {
 }
 
 function renderSidebar() {
+  if (state.mode === "mlsd") {
+    renderMlsdSidebar();
+    return;
+  }
+
   const groups = groupModules(state.filtered);
   const fragments = [];
 
@@ -169,6 +218,32 @@ function renderSidebar() {
   }
 
   els.moduleNav.innerHTML = fragments.join("");
+}
+
+function renderMlsdSidebar() {
+  if (!state.filteredDiagrams.length) {
+    els.moduleNav.innerHTML = `<p class="section-header__note">По этому запросу диаграммы не нашлись.</p>`;
+    return;
+  }
+
+  const items = state.filteredDiagrams
+    .map((diagram) => {
+      const active = diagram.slug === state.currentDiagramSlug ? " is-active" : "";
+      return `
+        <button class="module-link${active}" data-open-mlsd="${diagram.slug}" type="button">
+          <strong>${diagram.index}. ${diagram.title}</strong>
+          <span>${diagram.sourceHeading}</span>
+        </button>
+      `;
+    })
+    .join("");
+
+  els.moduleNav.innerHTML = `
+    <section class="module-group">
+      <p class="module-group__title">MLSD diagrams</p>
+      <div class="module-group__list">${items}</div>
+    </section>
+  `;
 }
 
 function renderLearningRoute() {
@@ -309,20 +384,52 @@ function updateTopbar(module) {
   els.topbarMeta.textContent = `${module.categoryLabel} · ${module.questionCount} ${pluralize(module.questionCount, "вопрос", "вопроса", "вопросов")} · ${routeMeta}`;
 }
 
+function updateMlsdTopbar(diagram) {
+  els.topbarTitle.textContent = diagram ? diagram.title : "ML System Design";
+  els.topbarMeta.textContent = `${state.diagrams.length} ${pluralize(state.diagrams.length, "диаграмма", "диаграммы", "диаграмм")} · PlantUML`;
+}
+
+function setMode(mode) {
+  state.mode = mode;
+  const isMlsd = mode === "mlsd";
+
+  els.studyTab.classList.toggle("is-active", !isMlsd);
+  els.mlsdTab.classList.toggle("is-active", isMlsd);
+  els.studyActions.classList.toggle("is-hidden", isMlsd);
+  els.searchLabel.textContent = isMlsd ? "Поиск по MLSD" : "Поиск по модулям";
+  els.search.placeholder = isMlsd ? "Например: PR-AUC, rollout, feature store" : "Например: RAG, SVM, метрики";
+}
+
 function revealReaderMode(module) {
+  setMode("study");
   els.homePanel.classList.add("is-hidden");
+  els.mlsdPanel.classList.add("is-hidden");
   els.readerPanel.classList.remove("is-hidden");
   updateTopbar(module);
 }
 
 function revealHomeMode() {
+  setMode("study");
   state.currentModule = null;
   state.currentPath = null;
+  state.currentDiagramSlug = null;
   els.readerPanel.classList.add("is-hidden");
+  els.mlsdPanel.classList.add("is-hidden");
   els.homePanel.classList.remove("is-hidden");
   els.articleContent.innerHTML = "";
   els.articleToc.innerHTML = "";
   updateTopbar(null);
+  renderSidebar();
+}
+
+function revealMlsdMode(diagram) {
+  setMode("mlsd");
+  state.currentModule = null;
+  state.currentPath = null;
+  els.homePanel.classList.add("is-hidden");
+  els.readerPanel.classList.add("is-hidden");
+  els.mlsdPanel.classList.remove("is-hidden");
+  updateMlsdTopbar(diagram);
   renderSidebar();
 }
 
@@ -361,6 +468,36 @@ function escapeHtml(text) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+function encodePlantUmlBase64(bytes) {
+  let output = "";
+
+  for (let index = 0; index < bytes.length; index += 3) {
+    const b1 = bytes[index];
+    const b2 = index + 1 < bytes.length ? bytes[index + 1] : 0;
+    const b3 = index + 2 < bytes.length ? bytes[index + 2] : 0;
+    const c1 = b1 >> 2;
+    const c2 = ((b1 & 0x3) << 4) | (b2 >> 4);
+    const c3 = ((b2 & 0xf) << 2) | (b3 >> 6);
+    const c4 = b3 & 0x3f;
+
+    output += PLANTUML_ALPHABET[c1 & 0x3f];
+    output += PLANTUML_ALPHABET[c2 & 0x3f];
+    if (index + 1 < bytes.length) output += PLANTUML_ALPHABET[c3 & 0x3f];
+    if (index + 2 < bytes.length) output += PLANTUML_ALPHABET[c4 & 0x3f];
+  }
+
+  return output;
+}
+
+function buildPlantUmlUrl(uml) {
+  if (!window.pako?.deflateRaw) {
+    return null;
+  }
+  const bytes = new TextEncoder().encode(uml);
+  const compressed = window.pako.deflateRaw(bytes, { level: 9 });
+  return `${PLANTUML_SERVER}${encodePlantUmlBase64(compressed)}`;
 }
 
 function normalizeMathDelimiters(markdown) {
@@ -414,6 +551,141 @@ async function fetchMarkdownBySourcePath(sourcePath) {
     return null;
   }
   return response.text();
+}
+
+async function fetchMlsdManifest() {
+  try {
+    const response = await fetch("./mlsd/manifest.json");
+    if (!response.ok) {
+      return [];
+    }
+    return response.json();
+  } catch (error) {
+    console.warn("MLSD manifest is not available", error);
+    return [];
+  }
+}
+
+async function fetchMlsdUml(diagram) {
+  const response = await fetch(`./mlsd/${diagram.umlPath}`);
+  if (!response.ok) {
+    return null;
+  }
+  return response.text();
+}
+
+function renderMlsdTerms(diagram) {
+  const terms = diagram.terms || [];
+  if (!terms.length) {
+    return "";
+  }
+
+  return `
+    <section class="mlsd-notes-block">
+      <p class="eyebrow">Термины</p>
+      <dl class="mlsd-terms">
+        ${terms
+          .map(
+            (term) => `
+              <div>
+                <dt>${escapeHtml(term.name)}</dt>
+                <dd>${escapeHtml(term.definition)}</dd>
+              </div>
+            `
+          )
+          .join("")}
+      </dl>
+    </section>
+  `;
+}
+
+function renderMlsdDiagram(diagram, uml) {
+  const sourceHref = `./mlsd/${diagram.umlPath}`;
+  const noteHref = `./mlsd/${diagram.notePath}`;
+  const imageUrl = uml ? buildPlantUmlUrl(uml) : null;
+  const talkTrack = (diagram.talkTrack || []).map((point) => `<li>${escapeHtml(point)}</li>`).join("");
+  const diagramFrame = imageUrl
+    ? `
+      <a class="mlsd-diagram-frame" href="${imageUrl}" target="_blank" rel="noreferrer">
+        <img id="mlsd-diagram-img" src="${imageUrl}" alt="${escapeHtml(diagram.title)}" />
+      </a>
+      <div class="mlsd-render-warning is-hidden" id="mlsd-render-warning">
+        Не удалось загрузить SVG с PlantUML server. Исходник ниже готов для локального рендера в PDF или SVG.
+      </div>
+    `
+    : `
+      <div class="mlsd-render-warning">
+        Для SVG-превью нужен pako из CDN. Исходник ниже готов для локального рендера в PDF или SVG.
+      </div>
+    `;
+
+  els.mlsdContent.innerHTML = `
+    <div class="mlsd-hero">
+      <div>
+        <p class="eyebrow">ML System Design</p>
+        <h2>${escapeHtml(diagram.title)}</h2>
+        <p>${escapeHtml(diagram.summary)}</p>
+      </div>
+      <div class="mlsd-actions">
+        ${imageUrl ? `<a class="ghost-btn" href="${imageUrl}" target="_blank" rel="noreferrer">Открыть SVG</a>` : ""}
+        <a class="ghost-btn" href="${sourceHref}" target="_blank" rel="noreferrer">.uml файл</a>
+        <a class="ghost-btn" href="${noteHref}" target="_blank" rel="noreferrer">Конспект</a>
+      </div>
+    </div>
+
+    <div class="mlsd-viewer-grid">
+      <section class="mlsd-diagram-card">
+        ${diagramFrame}
+      </section>
+
+      <aside class="mlsd-notes-card">
+        <section class="mlsd-notes-block">
+          <p class="eyebrow">Что проговорить</p>
+          <ul>${talkTrack}</ul>
+        </section>
+        ${renderMlsdTerms(diagram)}
+        <section class="mlsd-notes-block">
+          <p class="eyebrow">Быстрый ответ</p>
+          <p>${escapeHtml(diagram.interviewAnswer)}</p>
+        </section>
+      </aside>
+    </div>
+
+    <details class="mlsd-source">
+      <summary>PlantUML source</summary>
+      <pre><code>${escapeHtml(uml || "Не удалось загрузить UML-файл.")}</code></pre>
+    </details>
+  `;
+
+  const image = document.getElementById("mlsd-diagram-img");
+  const warning = document.getElementById("mlsd-render-warning");
+  if (image && warning) {
+    image.addEventListener("error", () => {
+      warning.classList.remove("is-hidden");
+    });
+  }
+}
+
+async function loadMlsdDiagram(slug) {
+  if (!state.diagrams.length) {
+    state.currentDiagramSlug = null;
+    els.mlsdContent.innerHTML = `
+      <div class="tip-card">
+        <h3>MLSD диаграммы не найдены</h3>
+        <p>Проверь, что выполнен <code>python3 scripts/build_mlsd_diagrams.py</code> и сайт пересобран.</p>
+      </div>
+    `;
+    revealMlsdMode(null);
+    closeSidebarOnMobile();
+    return;
+  }
+
+  const diagram = state.diagrams.find((item) => item.slug === slug) || state.diagrams[0];
+  state.currentDiagramSlug = diagram.slug;
+  const uml = await fetchMlsdUml(diagram);
+  renderMlsdDiagram(diagram, uml);
+  revealMlsdMode(diagram);
+  closeSidebarOnMobile();
 }
 
 async function buildHandbookFromModules() {
@@ -492,6 +764,11 @@ async function route() {
     revealHomeMode();
     return;
   }
+  if (isMlsdPath(hashPath)) {
+    const slug = hashPath.split("/")[1] || null;
+    await loadMlsdDiagram(slug);
+    return;
+  }
   if (hashPath === "__handbook__") {
     const handbook = state.modules.find((item) => item.path === "__handbook__");
     if (handbook) {
@@ -513,9 +790,23 @@ function attachUiHandlers() {
       setHashPath(path);
       return;
     }
+
+    const mlsdTarget = event.target.closest("[data-open-mlsd]");
+    if (mlsdTarget) {
+      const slug = mlsdTarget.getAttribute("data-open-mlsd");
+      setHashPath(getMlsdPath(slug));
+      return;
+    }
   });
 
   els.search.addEventListener("input", applySearch);
+  els.studyTab.addEventListener("click", () => {
+    setHashPath("");
+  });
+  els.mlsdTab.addEventListener("click", () => {
+    const slug = state.currentDiagramSlug || state.diagrams[0]?.slug || null;
+    setHashPath(getMlsdPath(slug));
+  });
   els.openSidebar.addEventListener("click", () => els.sidebar.classList.add("is-open"));
   els.closeSidebar.addEventListener("click", closeSidebarOnMobile);
   els.backHome.addEventListener("click", () => {
@@ -540,6 +831,10 @@ function attachUiHandlers() {
   });
   els.openHandbookHome.addEventListener("click", () => {
     setHashPath("__handbook__");
+  });
+  els.openMlsdHome.addEventListener("click", () => {
+    const slug = state.currentDiagramSlug || state.diagrams[0]?.slug || null;
+    setHashPath(getMlsdPath(slug));
   });
   els.copyLink.addEventListener("click", async () => {
     const url = window.location.href;
@@ -585,8 +880,11 @@ function registerServiceWorker() {
 
 async function init() {
   const response = await fetch("./assets/modules.json");
-  state.modules = await response.json();
+  const [modules, diagrams] = await Promise.all([response.json(), fetchMlsdManifest()]);
+  state.modules = modules;
+  state.diagrams = diagrams;
   state.filtered = state.modules.filter((item) => item.path !== "__handbook__");
+  state.filteredDiagrams = state.diagrams;
   toggleContinueButton();
   toggleInstallButton();
   renderSidebar();

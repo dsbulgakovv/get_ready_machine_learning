@@ -8,6 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 STUDY_DIR = ROOT / "knowledge_base" / "study"
+MLSD_DIR = ROOT / "mlsd_diagrams"
 PORTAL_SRC = ROOT / "portal_src"
 PORTAL_OUT = ROOT / "portal"
 
@@ -129,6 +130,28 @@ def copy_content() -> None:
         shutil.copy2(path, target)
 
 
+def copy_mlsd_diagrams() -> list[str]:
+    if not (MLSD_DIR / "manifest.json").exists():
+        return []
+
+    urls: list[str] = []
+    mlsd_out = PORTAL_OUT / "mlsd"
+    mlsd_out.mkdir(parents=True, exist_ok=True)
+
+    for source in [
+        MLSD_DIR / "manifest.json",
+        *sorted((MLSD_DIR / "uml").glob("*.uml")),
+        *sorted((MLSD_DIR / "notes").glob("*.md")),
+    ]:
+        rel = source.relative_to(MLSD_DIR)
+        target = mlsd_out / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+        urls.append(f"./mlsd/{rel.as_posix()}")
+
+    return urls
+
+
 def copy_static_assets() -> None:
     for source in PORTAL_SRC.rglob("*"):
         if source.is_dir():
@@ -145,7 +168,7 @@ def write_manifest(manifest: list[dict[str, object]]) -> None:
     (assets_dir / "modules.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def collect_precache_urls(manifest: list[dict[str, object]]) -> list[str]:
+def collect_precache_urls(manifest: list[dict[str, object]], mlsd_urls: list[str]) -> list[str]:
     urls = [
         "./",
         "./index.html",
@@ -159,6 +182,8 @@ def collect_precache_urls(manifest: list[dict[str, object]]) -> list[str]:
     for item in manifest:
         source_path = str(item["sourcePath"])
         urls.append(f"./content/{source_path}")
+
+    urls.extend(mlsd_urls)
 
     unique_urls = sorted(dict.fromkeys(urls))
     return unique_urls
@@ -183,8 +208,8 @@ def precache_version_seed(urls: list[str]) -> str:
     return "\n".join(parts)
 
 
-def write_service_worker(manifest: list[dict[str, object]]) -> None:
-    precache_urls = collect_precache_urls(manifest)
+def write_service_worker(manifest: list[dict[str, object]], mlsd_urls: list[str]) -> None:
+    precache_urls = collect_precache_urls(manifest, mlsd_urls)
     version_seed = precache_version_seed(precache_urls)
     cache_name = f"ml-portal-{hashlib.sha256(version_seed.encode('utf-8')).hexdigest()[:12]}"
 
@@ -268,6 +293,7 @@ def write_readme() -> None:
 ## Как пересобрать
 
 ```bash
+python3 scripts/build_mlsd_diagrams.py
 python3 scripts/build_study_modules.py
 python3 scripts/build_portal.py
 ```
@@ -300,8 +326,9 @@ def main() -> None:
     manifest = build_manifest()
     copy_static_assets()
     copy_content()
+    mlsd_urls = copy_mlsd_diagrams()
     write_manifest(manifest)
-    write_service_worker(manifest)
+    write_service_worker(manifest, mlsd_urls)
     write_nojekyll()
     write_readme()
 

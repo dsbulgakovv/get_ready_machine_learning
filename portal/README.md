@@ -5,6 +5,7 @@
 ## Как пересобрать
 
 ```bash
+python3 scripts/build_mlsd_diagrams.py
 python3 scripts/build_study_modules.py
 python3 scripts/build_portal.py
 ```

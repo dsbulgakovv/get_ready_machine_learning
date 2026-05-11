@@ -1,0 +1,260 @@
+{
+  "diagrams": [
+    {
+      "index": 1,
+      "slug": "universal_answer_flow",
+      "title": "Universal ML System Design Answer Flow",
+      "summary": "Главная карта ответа на ML System Design: от уточнения бизнес-цели до production, A/B, мониторинга и ownership. Ее удобно держать как скелет любого часового ответа.",
+      "talkTrack": [
+        "Начинай не с модели, а с цели, пользователя, цены ошибки и ограничений по latency, privacy, cost и explainability.",
+        "Связывай business metric, product proxy, ML metric и guardrails, чтобы интервьюер видел причинную цепочку.",
+        "Baseline нужен как быстрая проверка гипотезы и нижняя планка, advanced model стоит предлагать только после понимания данных и ROI.",
+        "Production часть должна включать serving mode, feature availability, fallback, monitoring, rollout и rollback.",
+        "В конце проговаривай, кто чем владеет: analytics, data, ML, backend, MLOps, QA/risk."
+      ],
+      "terms": [
+        {
+          "name": "North Star metric",
+          "definition": "Главная бизнес-метрика продукта или инициативы: revenue, GMV, margin, retention, SLA или cost reduction. Она объясняет, ради чего вообще строится ML-система."
+        },
+        {
+          "name": "Guardrail metrics",
+          "definition": "Метрики, которые не должны ухудшиться при росте основной метрики: latency, error rate, complaint rate, fairness, infra cost, long-term retention."
+        },
+        {
+          "name": "Train-serving skew",
+          "definition": "Расхождение между тем, как фичи считаются на train, и тем, как они доступны в production. Частая причина сильного падения качества после запуска."
+        }
+      ],
+      "interviewAnswer": "Я бы вел ответ по цепочке Business → Metrics → Data → Model → Validation → Production → A/B → Monitoring → Team. Так я показываю, что дизайн системы начинается с impact, а модель является только одним из компонентов решения."
+    },
+    {
+      "index": 2,
+      "slug": "metric_tree",
+      "title": "Metric Tree",
+      "summary": "Дерево метрик показывает, как связать бизнес-результат, продуктовые прокси, offline ML-качество, системные ограничения и decision criteria.",
+      "talkTrack": [
+        "Business-метрика отвечает на вопрос, принесла ли система деньги, удержание, снижение потерь или качество сервиса.",
+        "Product-метрики обычно реагируют быстрее и помогают диагностировать funnel: CTR, CVR, activation, frequency, complaints.",
+        "ML-метрики должны соответствовать типу задачи: PR-AUC для редких положительных классов, NDCG@K для ranking, WAPE для demand/forecasting.",
+        "Diagnostic metrics нужны для объяснения деградации: freshness, missing rate, drift, score distribution, label delay.",
+        "Решение о запуске принимается не по одной offline-метрике, а по бизнес-эффекту при стабильных guardrails."
+      ],
+      "terms": [
+        {
+          "name": "PR-AUC",
+          "definition": "Площадь под precision-recall кривой. Особенно полезна при дисбалансе классов, например fraud, churn, abuse."
+        },
+        {
+          "name": "NDCG@K",
+          "definition": "Ranking-метрика, которая учитывает позицию релевантных объектов в top-K и штрафует хорошие ответы, показанные слишком низко."
+        },
+        {
+          "name": "WAPE",
+          "definition": "Weighted Absolute Percentage Error: сумма абсолютных ошибок, деленная на сумму фактических значений. Удобна для demand/revenue forecasting."
+        },
+        {
+          "name": "Calibration",
+          "definition": "Соответствие вероятностей реальной частоте событий. Если модель говорит 0.8, событие должно происходить примерно в 80% таких случаев."
+        }
+      ],
+      "interviewAnswer": "Я бы построил metric tree: сверху business outcome, ниже product proxy, потом ML metric, guardrails и diagnostics. Это защищает от ситуации, когда offline AUC растет, а продукту становится хуже."
+    },
+    {
+      "index": 3,
+      "slug": "domain_decision_map",
+      "title": "Domain Decision Map",
+      "summary": "Карта выбора ML-подхода по типу задачи: classification, regression, ranking, recsys, forecasting, NLP/LLM, CV, optimization и fraud/anomaly detection.",
+      "talkTrack": [
+        "Сначала формулируй, что именно предсказываем или оптимизируем: вероятность, число, порядок, будущий спрос, действие, текст или изображение.",
+        "Для каждого домена называй простой baseline и более сильную модель: SQL/rules/BM25/popularity перед CatBoost, LambdaMART, two-tower, transformer или LLM.",
+        "Метрика должна совпадать с пользовательским действием: ranking оценивается top-K метриками, pricing - margin/revenue/retention, fraud - prevented loss при review capacity.",
+        "Не забывай про систему вокруг модели: human review для high-risk, business rules для pricing, retrieval для RAG, fallback для online inference.",
+        "Всегда возвращайся к бизнес-ценности и trade-off quality vs latency/cost/explainability."
+      ],
+      "terms": [
+        {
+          "name": "Two-tower model",
+          "definition": "Архитектура для retrieval/recsys/search: одна башня кодирует пользователя или запрос, другая объект; близость embedding помогает быстро искать кандидатов."
+        },
+        {
+          "name": "LambdaMART",
+          "definition": "Градиентный бустинг для learning-to-rank, который оптимизирует порядок объектов, а не независимое предсказание для каждого объекта."
+        },
+        {
+          "name": "Uplift modeling",
+          "definition": "Моделирование инкрементального эффекта действия: кому пуш, скидка или звонок реально изменит поведение, а не просто совпадет с высокой склонностью купить."
+        }
+      ],
+      "interviewAnswer": "Я бы сначала определил тип решения: событие, число, ranking, recommendation, forecast, NLP/CV или optimization. Затем предложил baseline, advanced approach, подходящую метрику и объяснил trade-offs."
+    },
+    {
+      "index": 4,
+      "slug": "production_architecture",
+      "title": "Production ML Architecture",
+      "summary": "End-to-end production контур: ingestion, feature engineering, training, registry, batch/online/hybrid serving, experiments, monitoring и feedback loop.",
+      "talkTrack": [
+        "Разделяй offline training path и online serving path: они используют разные SLA, storage и проверки качества.",
+        "Batch scoring хорош, когда решение не требует миллисекундной свежести; online нужен для интерактивного продукта; hybrid сочетает тяжелые precomputed candidates и легкий reranking.",
+        "Feature store снижает риск train-serving skew, но не отменяет проверку freshness, backfill и совместимость схем.",
+        "Model registry нужен для versioning, approval, reproducibility и rollback.",
+        "Monitoring должен покрывать data, model, business и system уровни, иначе деградация будет обнаружена слишком поздно."
+      ],
+      "terms": [
+        {
+          "name": "Batch scoring",
+          "definition": "Периодический расчет предсказаний заранее, например hourly/daily. Дешевле и проще, но менее свежо."
+        },
+        {
+          "name": "Online inference",
+          "definition": "Скоринг в момент запроса пользователя через API/model serving. Требует низкой latency, fallback и надежных online features."
+        },
+        {
+          "name": "Model registry",
+          "definition": "Хранилище версий моделей с метаданными, метриками, артефактами, стадиями approval и возможностью rollback."
+        }
+      ],
+      "interviewAnswer": "Я бы описал два контура: данные и обучение offline, затем serving как batch, online или hybrid. После этого добавил бы experiment layer, monitoring, feedback loop и rollback."
+    },
+    {
+      "index": 5,
+      "slug": "team_and_lead_ownership",
+      "title": "Team and Lead Ownership",
+      "summary": "Схема показывает, как lead DS держит framing, trade-offs, interfaces, quality bar и delivery без раздувания команды.",
+      "talkTrack": [
+        "Lead не обязан делать все лично; он владеет рамкой задачи, рисками, интерфейсами между потоками и качеством решения.",
+        "Работу удобно раскладывать на streams: product/analytics, data engineering, ML/DS, backend integration, MLOps/platform, QA/risk/legal.",
+        "Для MVP лучше использовать существующие платформы и простые решения, пока business value не доказан.",
+        "Design doc, architecture review, experiment review и launch checklist превращают неопределенность в управляемые решения.",
+        "Команду стоит масштабировать после подтверждения ROI, а не на этапе красивой идеи."
+      ],
+      "terms": [
+        {
+          "name": "Quality bar",
+          "definition": "Явный стандарт качества решения: метрики, тесты, мониторинг, документация, rollback, безопасность и понятные критерии запуска."
+        },
+        {
+          "name": "One owner per stream",
+          "definition": "В каждом рабочем потоке есть ответственный за результат и коммуникацию, но это не значит, что на каждую микрозадачу нужен отдельный человек."
+        },
+        {
+          "name": "Non-goals",
+          "definition": "То, что команда сознательно не делает в MVP. Это защищает от расползания scope и overengineering."
+        }
+      ],
+      "interviewAnswer": "Как lead я бы держал цель, риски, ключевые trade-offs и интерфейсы между потоками. Команду разложил бы на owners по streams и начал с MVP на существующей платформе."
+    },
+    {
+      "index": 6,
+      "slug": "sixty_minute_timeline",
+      "title": "60-Minute Interview Answer Timeline",
+      "summary": "Тайминг часового MLSD ответа: сколько времени тратить на clarification, metrics, data/model, architecture, validation, team plan и final summary.",
+      "talkTrack": [
+        "Первые 5 минут нужны, чтобы не решать не ту задачу: уточнить пользователя, цель, constraints и цену ошибки.",
+        "К 10-й минуте желательно зафиксировать business metric, product proxy, ML metric и guardrails.",
+        "До середины интервью нужно успеть data/formulation/baseline/advanced model, иначе architecture будет висеть в воздухе.",
+        "Production и validation нельзя оставлять на последние 2 минуты: это сильная часть senior/lead ответа.",
+        "Финальная минута должна связать решение с business impact, risks и rollout."
+      ],
+      "terms": [
+        {
+          "name": "MDE",
+          "definition": "Minimum Detectable Effect: минимальный эффект, который эксперимент способен статистически заметить при заданной мощности и размере выборки."
+        },
+        {
+          "name": "SRM",
+          "definition": "Sample Ratio Mismatch: нарушение ожидаемых долей трафика в A/B. Часто указывает на баг в рандомизации или логировании."
+        },
+        {
+          "name": "Shadow mode",
+          "definition": "Модель считает решения в production-потоке, но не влияет на пользователя. Нужен для проверки latency, логирования и стабильности."
+        }
+      ],
+      "interviewAnswer": "Я бы управлял временем явно: 5 минут clarification, 5 минут metrics, 20 минут data/model, 10 минут architecture, 8 минут validation, 7 минут team/risk и 5 минут на summary."
+    },
+    {
+      "index": 7,
+      "slug": "validation_and_ab_flow",
+      "title": "Model Validation and A/B Test Flow",
+      "summary": "Путь от offline validation до решения ship/iterate/rollback: корректный split, метрики, segment analysis, shadow/A-A, дизайн A/B, SRM и rollout.",
+      "talkTrack": [
+        "Offline split должен соответствовать реальному будущему использованию: time-based, user-based или group-based, без leakage.",
+        "Кроме ML-метрик нужно считать business proxy и segment analysis, иначе среднее качество может скрыть деградацию важных сегментов.",
+        "Перед A/B проверь logging, shadow mode, A/A или pre-period balance, особенно для online decisions.",
+        "В дизайне A/B назови hypothesis, primary metric, guardrails, unit of randomization, MDE, duration и stopping rules.",
+        "Ship происходит постепенно: rollout процентами с rollback criteria, а не мгновенный full launch."
+      ],
+      "terms": [
+        {
+          "name": "Unit of randomization",
+          "definition": "Единица, на которой делится эксперимент: user, session, seller, geo, courier или time bucket. Неверный выбор вызывает contamination."
+        },
+        {
+          "name": "Practical significance",
+          "definition": "Эффект достаточно большой, чтобы иметь бизнес-смысл после учета стоимости, риска и операционной сложности."
+        },
+        {
+          "name": "Segment stability",
+          "definition": "Проверка, что выигрыш не куплен сильной деградацией по регионам, устройствам, категориям, новым пользователям или high-value cohorts."
+        }
+      ],
+      "interviewAnswer": "Я бы не запускал модель только по offline metric. Сначала корректный split и segment analysis, потом shadow/A-A/logging checks, затем A/B с guardrails и постепенный rollout."
+    },
+    {
+      "index": 8,
+      "slug": "senior_answer_loop",
+      "title": "Senior Answer Loop",
+      "summary": "Компактная петля для запоминания: Business → Metrics → Data → Model → Validation → Production → Experiment → Monitoring → Team → Business impact.",
+      "talkTrack": [
+        "Эта схема нужна как mental checklist, чтобы не забыть важные блоки под давлением интервью.",
+        "Если сбился, возвращайся к следующему звену цепочки и проговаривай trade-off.",
+        "Loop подчеркивает, что после запуска данные и мониторинг возвращаются обратно в улучшение продукта и модели.",
+        "Senior-ответ отличается тем, что держит не только model quality, но и production, risk, cost и ownership.",
+        "Финальный business impact закрывает петлю и показывает, как ML-система окупается."
+      ],
+      "terms": [
+        {
+          "name": "Business impact",
+          "definition": "Измеримое изменение для бизнеса: revenue, margin, retention, loss prevention, cost reduction, SLA или качество операционного процесса."
+        },
+        {
+          "name": "Fallback",
+          "definition": "Безопасное поведение системы, если модель, feature store или external dependency недоступны: rules, cache, popularity, previous score."
+        },
+        {
+          "name": "Rollback",
+          "definition": "План быстрого отката модели, конфигурации или rollout percentage при ухудшении guardrails или системной стабильности."
+        }
+      ],
+      "interviewAnswer": "Мой короткий фрейм: business value, metrics, data trust, baseline/model, validation, production, A/B, monitoring, team ownership и возврат к impact."
+    },
+    {
+      "index": 9,
+      "slug": "interview_quick_reference",
+      "title": "Interview Quick Reference",
+      "summary": "Одностраничная шпаргалка с полной последовательностью ответа и подсказками справа: что уточнить, какие метрики назвать, как перейти к production и lead ownership.",
+      "talkTrack": [
+        "Эту диаграмму можно использовать как последний прогон перед интервью: она напоминает полный порядок без деталей.",
+        "В каждом блоке нужно назвать 2-3 конкретики, а не говорить общими словами: например latency p95, PR-AUC, label delay, rollback criteria.",
+        "Формулировка baseline → advanced approach показывает зрелость: ты не прыгаешь сразу в сложную модель.",
+        "Production должен звучать прикладно: batch/online/hybrid, API, cache, DB, Kafka, feature store, monitoring.",
+        "Lead ownership в конце закрепляет seniority: owners, risks, design review, lean team и связь с business metric."
+      ],
+      "terms": [
+        {
+          "name": "Label delay",
+          "definition": "Задержка появления таргета после события. Например churn или default может стать известен через недели, что влияет на training data и мониторинг."
+        },
+        {
+          "name": "Expected profit",
+          "definition": "Business-aware offline proxy, где TP/FP/FN/TN имеют разную денежную ценность. Лучше простой accuracy, если цена ошибок различается."
+        },
+        {
+          "name": "Decision engine",
+          "definition": "Слой после модели, который применяет thresholds, business rules, constraints, fallback и иногда human-review routing."
+        }
+      ],
+      "interviewAnswer": "Я бы шел по этой странице сверху вниз и в каждом блоке давал конкретный пример: metric, data risk, baseline, serving mode, validation check, rollout и owner."
+    }
+  ]
+}

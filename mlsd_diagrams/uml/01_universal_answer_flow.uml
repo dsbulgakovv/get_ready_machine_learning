@@ -1,0 +1,276 @@
+@startuml
+title Universal ML System Design Answer Flow — Lead DS
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 20
+skinparam defaultFontName Inter
+skinparam defaultFontSize 13
+skinparam ArrowColor #475569
+skinparam ArrowThickness 1.4
+
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+  FontColor #0F172A
+}
+
+skinparam activityDiamond {
+  BackgroundColor #FEF3C7
+  BorderColor #F59E0B
+}
+
+start
+
+partition "1. Business context" #DBEAFE {
+  :Получил задачу / сервис / продуктовый кейс;
+  :Уточнить бизнес-контекст;
+  note right
+    Кто пользователь?
+    Какую бизнес-метрику улучшаем?
+    Какая цена FP/FN?
+    Batch или real-time?
+    Ограничения: latency, privacy, cost, explainability
+  end note
+
+  :Сформулировать цель и success criteria;
+  note right
+    North Star:
+    GMV, revenue, margin,
+    retention, cost reduction,
+    SLA, NPS
+  end note
+}
+
+partition "2. Metric tree" #DCFCE7 {
+  :Построить дерево метрик;
+  note right
+    Business:
+    revenue, GMV, margin, retention
+
+    Product:
+    CTR, CVR, churn, activation, frequency
+
+    Guardrails:
+    latency, complaints, errors,
+    fairness, infra cost, retention degradation
+  end note
+}
+
+partition "3. ML formulation" #F3E8FF {
+  :Перевести в ML / аналитическую задачу;
+
+  if ("Тип задачи?") then ("classification")
+    :Churn / fraud / propensity / moderation;
+    note right
+      Metrics:
+      PR-AUC, ROC-AUC,
+      Precision@K, Recall@K,
+      calibration, expected profit
+    end note
+  elseif ("regression")
+    :ETA / LTV / demand / price;
+    note right
+      Metrics:
+      MAE, RMSE, WAPE,
+      bias, quantile loss
+    end note
+  elseif ("ranking")
+    :Search / recommendations / next-best-action;
+    note right
+      Metrics:
+      NDCG@K, MAP@K,
+      MRR, Recall@K, CTR/CVR
+    end note
+  elseif ("NLP / LLM / RAG")
+    :QA / summarization / extraction / assistant;
+    note right
+      Metrics:
+      retrieval Recall@K,
+      groundedness,
+      hallucination rate,
+      human eval, cost
+    end note
+  elseif ("CV")
+    :OCR / detection / moderation / quality control;
+    note right
+      Metrics:
+      F1, mAP, IoU,
+      CER/WER,
+      manual review reduction
+    end note
+  else ("pricing / optimization")
+    :Dynamic pricing / promo / bids / allocation;
+    note right
+      Metrics:
+      margin, revenue,
+      elasticity, conversion,
+      long-term retention
+    end note
+  endif
+}
+
+partition "4. Data and features" #FEF9C3 {
+  :Разобрать данные и фичи;
+  note right
+    Sources:
+    logs, transactions, profiles,
+    texts, images, CRM, support, external data
+
+    Data quality:
+    missing, duplicates, freshness,
+    target leakage, label delay,
+    train-serving skew
+
+    Feature engineering:
+    RFM, history, aggregates,
+    embeddings, graph features,
+    temporal and segment features
+  end note
+}
+
+partition "5. Baseline and model approach" #F3E8FF {
+  :Выбрать baseline;
+  note right
+    rules, SQL, popularity,
+    logistic regression, CatBoost,
+    BM25, moving average
+  end note
+
+  :Предложить advanced model;
+  note right
+    GBDT, ranking, two-tower,
+    transformer, LLM, uplift,
+    bandits, optimization
+  end note
+
+  :Обсудить trade-offs;
+  note right
+    quality vs latency
+    quality vs cost
+    explainability vs complexity
+    offline quality vs online impact
+  end note
+}
+
+partition "6. Offline validation" #FFEDD5 {
+  :Провалидировать offline;
+  note right
+    Correct split:
+    time-based, user-based,
+    group-based, no leakage
+
+    Offline metrics:
+    AUC, PR-AUC, F1,
+    NDCG, MAE, WAPE,
+    calibration
+
+    Business proxy:
+    profit curve, expected value,
+    saved cost, incremental LTV
+
+    Segment analysis:
+    regions, devices, cohorts,
+    categories, high-value users
+  end note
+}
+
+partition "7. Production design" #E2E8F0 {
+  :Спроектировать production-систему;
+
+  if ("Serving mode?") then ("Batch")
+    :Batch scoring;
+    note right
+      Airflow / Spark / SQL
+      → scores table
+      → product consumes scores
+    end note
+  elseif ("Online")
+    :Online inference;
+    note right
+      API → feature service
+      → model serving
+      → decision engine
+    end note
+  else ("Hybrid")
+    :Hybrid serving;
+    note right
+      batch candidates/features
+      + online reranking/scoring
+    end note
+  endif
+}
+
+partition "8. Online validation and A/B" #FFEDD5 {
+  :Спланировать online validation / A-B test;
+  note right
+    Experiment:
+    hypothesis, primary metric,
+    guardrails, unit of randomization
+
+    Quality checks:
+    SRM, logging, overlap,
+    pre-period balance
+
+    Decision:
+    effect size, CI,
+    practical significance,
+    segment stability
+
+    Rollout:
+    shadow → 1% → 5%
+    → 25% → 50% → 100%
+  end note
+}
+
+partition "9. Monitoring and operations" #E2E8F0 {
+  :Настроить monitoring and operations;
+  note right
+    Data monitoring:
+    freshness, missing rate,
+    drift, schema changes
+
+    Model monitoring:
+    score distribution, calibration,
+    quality by segment, retraining triggers
+
+    Business monitoring:
+    North Star, funnel, revenue,
+    retention, complaints
+
+    System monitoring:
+    p50/p95/p99 latency,
+    errors, throughput, queue lag, cost
+  end note
+}
+
+partition "10. Team and lead ownership" #FEE2E2 {
+  :Разложить команду и ownership;
+  note right
+    Lead role:
+    goal, scope, trade-offs,
+    design review, risk management,
+    stakeholder sync
+
+    Streams:
+    Product / Analytics / Data /
+    ML / Backend / MLOps / QA
+
+    Lean team:
+    MVP first, reuse platform,
+    shared services,
+    automate repeatable work
+  end note
+
+  :Final summary;
+  note right
+    business value
+    + ML approach
+    + architecture
+    + experiment
+    + team plan
+  end note
+}
+
+stop
+@enduml

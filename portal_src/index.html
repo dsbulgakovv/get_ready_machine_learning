@@ -40,6 +40,7 @@
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako_deflate.min.js"></script>
     <script defer src="./assets/app.js"></script>
   </head>
   <body>
@@ -60,7 +61,12 @@
           </label>
         </div>
 
-        <div class="sidebar__actions">
+        <div class="mode-tabs" role="tablist" aria-label="Разделы портала">
+          <button class="mode-tab is-active" id="study-tab" type="button">Study</button>
+          <button class="mode-tab" id="mlsd-tab" type="button">ML System Design</button>
+        </div>
+
+        <div class="sidebar__actions" id="study-actions">
           <button class="pill-btn" id="continue-button" type="button" hidden>Продолжить с последнего</button>
           <button class="ghost-btn" id="install-app" type="button" hidden>Установить</button>
           <button class="ghost-btn" id="open-handbook" type="button">Открыть handbook</button>
@@ -99,6 +105,7 @@
               <div class="hero-card__actions">
                 <button class="pill-btn" id="start-learning" type="button">Начать с Classic ML</button>
                 <button class="ghost-btn" id="open-handbook-home" type="button">Открыть весь handbook</button>
+                <button class="ghost-btn" id="open-mlsd-home" type="button">ML System Design</button>
               </div>
             </div>
 
@@ -114,6 +121,10 @@
               <div class="tip-card">
                 <h3>С ноутбука</h3>
                 <p>Удобнее идти по большим темам и держать открытым поиск по модулям в левой панели.</p>
+              </div>
+              <div class="tip-card">
+                <h3>ML System Design</h3>
+                <p>Отдельная вкладка с PlantUML-схемами, быстрыми формулировками и терминами для собеса.</p>
               </div>
               <div class="tip-card">
                 <h3>Как поставить на экран</h3>
@@ -170,6 +181,10 @@
                 </div>
               </aside>
             </div>
+          </section>
+
+          <section class="mlsd-panel is-hidden" id="mlsd-panel">
+            <div id="mlsd-content" class="mlsd-content"></div>
           </section>
         </main>
       </div>
