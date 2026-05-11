@@ -8,269 +8,216 @@ skinparam defaultFontName Inter
 skinparam defaultFontSize 13
 skinparam ArrowColor #475569
 skinparam ArrowThickness 1.4
+skinparam linetype ortho
 
-skinparam activity {
+skinparam rectangle {
   BackgroundColor #F8FAFC
   BorderColor #334155
   FontColor #0F172A
 }
 
-skinparam activityDiamond {
-  BackgroundColor #FEF3C7
-  BorderColor #F59E0B
+skinparam note {
+  BackgroundColor #FEF9C3
+  BorderColor #CA8A04
+  FontColor #0F172A
 }
 
-start
+top to bottom direction
 
-partition "1. Business context" #DBEAFE {
-  :Получил задачу / сервис / продуктовый кейс;
-  :Уточнить бизнес-контекст;
-  note right
-    Кто пользователь?
-    Какую бизнес-метрику улучшаем?
-    Какая цена FP/FN?
-    Batch или real-time?
-    Ограничения: latency, privacy, cost, explainability
-  end note
+rectangle "1. Business context\n\nПолучить кейс\nУточнить пользователя, цель,\nцену ошибки и constraints" as Business #DBEAFE
+note right of Business
+  Questions:
+  - Who is the user?
+  - What business metric matters?
+  - What is the cost of FP/FN?
+  - Batch, online or hybrid?
+  - Latency, privacy, cost, explainability?
 
-  :Сформулировать цель и success criteria;
-  note right
-    North Star:
-    GMV, revenue, margin,
-    retention, cost reduction,
-    SLA, NPS
-  end note
-}
+  Success:
+  GMV, revenue, margin,
+  retention, cost reduction,
+  SLA, NPS
+end note
 
-partition "2. Metric tree" #DCFCE7 {
-  :Построить дерево метрик;
-  note right
-    Business:
-    revenue, GMV, margin, retention
+rectangle "2. Metric tree\n\nBusiness → Product → ML\n→ Guardrails → Decision" as Metrics #DCFCE7
+note right of Metrics
+  Business:
+  revenue, GMV, margin, retention
 
-    Product:
-    CTR, CVR, churn, activation, frequency
+  Product:
+  CTR, CVR, churn,
+  activation, frequency
 
-    Guardrails:
-    latency, complaints, errors,
-    fairness, infra cost, retention degradation
-  end note
-}
+  Guardrails:
+  latency, complaints, errors,
+  fairness, infra cost
+end note
 
-partition "3. ML formulation" #F3E8FF {
-  :Перевести в ML / аналитическую задачу;
+rectangle "3. ML formulation\n\nПеревести продуктовую цель\nв ML / analytics задачу" as MLForm #F3E8FF
+note right of MLForm
+  Task taxonomy:
+  - Classification:
+    churn, fraud, propensity, moderation
+    PR-AUC, ROC-AUC, Precision@K, Recall@K
 
-  if ("Тип задачи?") then ("classification")
-    :Churn / fraud / propensity / moderation;
-    note right
-      Metrics:
-      PR-AUC, ROC-AUC,
-      Precision@K, Recall@K,
-      calibration, expected profit
-    end note
-  elseif ("regression")
-    :ETA / LTV / demand / price;
-    note right
-      Metrics:
-      MAE, RMSE, WAPE,
-      bias, quantile loss
-    end note
-  elseif ("ranking")
-    :Search / recommendations / next-best-action;
-    note right
-      Metrics:
-      NDCG@K, MAP@K,
-      MRR, Recall@K, CTR/CVR
-    end note
-  elseif ("NLP / LLM / RAG")
-    :QA / summarization / extraction / assistant;
-    note right
-      Metrics:
-      retrieval Recall@K,
-      groundedness,
-      hallucination rate,
-      human eval, cost
-    end note
-  elseif ("CV")
-    :OCR / detection / moderation / quality control;
-    note right
-      Metrics:
-      F1, mAP, IoU,
-      CER/WER,
-      manual review reduction
-    end note
-  else ("pricing / optimization")
-    :Dynamic pricing / promo / bids / allocation;
-    note right
-      Metrics:
-      margin, revenue,
-      elasticity, conversion,
-      long-term retention
-    end note
-  endif
-}
+  - Regression:
+    ETA, LTV, demand, price
+    MAE, RMSE, WAPE, bias
 
-partition "4. Data and features" #FEF9C3 {
-  :Разобрать данные и фичи;
-  note right
-    Sources:
-    logs, transactions, profiles,
-    texts, images, CRM, support, external data
+  - Ranking / Recsys:
+    search, recommendations, next-best-action
+    NDCG@K, MAP@K, MRR, Recall@K
 
-    Data quality:
-    missing, duplicates, freshness,
-    target leakage, label delay,
-    train-serving skew
+  - NLP / LLM / RAG:
+    QA, extraction, assistant
+    retrieval Recall@K, groundedness, hallucination
 
-    Feature engineering:
-    RFM, history, aggregates,
-    embeddings, graph features,
-    temporal and segment features
-  end note
-}
+  - CV:
+    OCR, detection, moderation
+    F1, mAP, IoU, CER/WER
 
-partition "5. Baseline and model approach" #F3E8FF {
-  :Выбрать baseline;
-  note right
-    rules, SQL, popularity,
-    logistic regression, CatBoost,
-    BM25, moving average
-  end note
+  - Pricing / optimization:
+    promo, bids, allocation
+    margin, revenue, elasticity, conversion
+end note
 
-  :Предложить advanced model;
-  note right
-    GBDT, ranking, two-tower,
-    transformer, LLM, uplift,
-    bandits, optimization
-  end note
+rectangle "4. Data and features\n\nПроверить источники,\nтаргет, качество данных\nи доступность фичей" as Data #FEF9C3
+note right of Data
+  Sources:
+  logs, transactions, profiles,
+  texts, images, CRM, support
 
-  :Обсудить trade-offs;
-  note right
-    quality vs latency
-    quality vs cost
-    explainability vs complexity
-    offline quality vs online impact
-  end note
-}
+  Data risks:
+  missing, duplicates, freshness,
+  leakage, label delay,
+  train-serving skew
 
-partition "6. Offline validation" #FFEDD5 {
-  :Провалидировать offline;
-  note right
-    Correct split:
-    time-based, user-based,
-    group-based, no leakage
+  Features:
+  RFM, history, aggregates,
+  embeddings, graph, temporal,
+  segment features
+end note
 
-    Offline metrics:
-    AUC, PR-AUC, F1,
-    NDCG, MAE, WAPE,
-    calibration
+rectangle "5. Baseline and model approach\n\nСначала простой baseline,\nзатем advanced model\nпри понятном ROI" as Model #F3E8FF
+note right of Model
+  Baseline:
+  rules, SQL, popularity,
+  logistic regression, CatBoost,
+  BM25, moving average
 
-    Business proxy:
-    profit curve, expected value,
-    saved cost, incremental LTV
+  Advanced:
+  GBDT, ranking, two-tower,
+  transformer, LLM, uplift,
+  bandits, optimization
 
-    Segment analysis:
-    regions, devices, cohorts,
-    categories, high-value users
-  end note
-}
+  Trade-offs:
+  quality vs latency/cost,
+  explainability vs complexity,
+  offline quality vs online impact
+end note
 
-partition "7. Production design" #E2E8F0 {
-  :Спроектировать production-систему;
+rectangle "6. Offline validation\n\nПроверить качество,\nсегменты и business proxy\nдо production" as Offline #FFEDD5
+note right of Offline
+  Correct split:
+  time-based, user-based,
+  group-based, no leakage
 
-  if ("Serving mode?") then ("Batch")
-    :Batch scoring;
-    note right
-      Airflow / Spark / SQL
-      → scores table
-      → product consumes scores
-    end note
-  elseif ("Online")
-    :Online inference;
-    note right
-      API → feature service
-      → model serving
-      → decision engine
-    end note
-  else ("Hybrid")
-    :Hybrid serving;
-    note right
-      batch candidates/features
-      + online reranking/scoring
-    end note
-  endif
-}
+  Metrics:
+  AUC, PR-AUC, F1,
+  NDCG, MAE, WAPE,
+  calibration
 
-partition "8. Online validation and A/B" #FFEDD5 {
-  :Спланировать online validation / A-B test;
-  note right
-    Experiment:
-    hypothesis, primary metric,
-    guardrails, unit of randomization
+  Business proxy:
+  profit curve, expected value,
+  saved cost, incremental LTV
+end note
 
-    Quality checks:
-    SRM, logging, overlap,
-    pre-period balance
+rectangle "7. Production design\n\nСпроектировать serving,\nfeatures, storage, API,\nfallback и rollback" as Production #E2E8F0
+note right of Production
+  Serving modes:
 
-    Decision:
-    effect size, CI,
-    practical significance,
-    segment stability
+  Batch:
+  Airflow / Spark / SQL
+  → scores table
+  → product consumes scores
 
-    Rollout:
-    shadow → 1% → 5%
-    → 25% → 50% → 100%
-  end note
-}
+  Online:
+  API → feature service
+  → model serving
+  → decision engine
 
-partition "9. Monitoring and operations" #E2E8F0 {
-  :Настроить monitoring and operations;
-  note right
-    Data monitoring:
-    freshness, missing rate,
-    drift, schema changes
+  Hybrid:
+  batch candidates/features
+  + online reranking/scoring
+end note
 
-    Model monitoring:
-    score distribution, calibration,
-    quality by segment, retraining triggers
+rectangle "8. Online validation and A/B\n\nПроверить impact через\nshadow, A/A, A/B\nи staged rollout" as Online #FFEDD5
+note right of Online
+  Experiment:
+  hypothesis, primary metric,
+  guardrails, randomization unit
 
-    Business monitoring:
-    North Star, funnel, revenue,
-    retention, complaints
+  Quality checks:
+  SRM, logging, overlap,
+  pre-period balance
 
-    System monitoring:
-    p50/p95/p99 latency,
-    errors, throughput, queue lag, cost
-  end note
-}
+  Decision:
+  effect size, CI,
+  practical significance,
+  segment stability
 
-partition "10. Team and lead ownership" #FEE2E2 {
-  :Разложить команду и ownership;
-  note right
-    Lead role:
-    goal, scope, trade-offs,
-    design review, risk management,
-    stakeholder sync
+  Rollout:
+  shadow → 1% → 5%
+  → 25% → 50% → 100%
+end note
 
-    Streams:
-    Product / Analytics / Data /
-    ML / Backend / MLOps / QA
+rectangle "9. Monitoring and operations\n\nСледить за data, model,\nbusiness и system health" as Monitoring #E2E8F0
+note right of Monitoring
+  Data:
+  freshness, missing rate,
+  drift, schema changes
 
-    Lean team:
-    MVP first, reuse platform,
-    shared services,
-    automate repeatable work
-  end note
+  Model:
+  score distribution,
+  calibration, quality by segment,
+  retraining triggers
 
-  :Final summary;
-  note right
-    business value
-    + ML approach
-    + architecture
-    + experiment
-    + team plan
-  end note
-}
+  Business:
+  North Star, funnel,
+  revenue, retention, complaints
 
-stop
+  System:
+  p50/p95/p99 latency,
+  errors, throughput, queue lag, cost
+end note
+
+rectangle "10. Team and lead ownership\n\nРазложить streams,\nowners, risks, reviews\nи lean delivery" as Team #FEE2E2
+note right of Team
+  Lead role:
+  goal, scope, trade-offs,
+  design review, risk management,
+  stakeholder sync
+
+  Streams:
+  Product / Analytics / Data /
+  ML / Backend / MLOps / QA
+
+  Lean team:
+  MVP first, reuse platform,
+  shared services,
+  automate repeatable work
+end note
+
+rectangle "Final summary\n\nBusiness value\n+ ML approach\n+ architecture\n+ experiment\n+ team plan" as Summary #DBEAFE
+
+Business --> Metrics
+Metrics --> MLForm
+MLForm --> Data
+Data --> Model
+Model --> Offline
+Offline --> Production
+Production --> Online
+Online --> Monitoring
+Monitoring --> Team
+Team --> Summary
 @enduml
