@@ -500,13 +500,13 @@ package "Training and registry" #F3E8FF {
   [Training dataset builder] as Builder
   [Model training pipeline] as Train
   [Offline evaluation] as Eval
-  diamond "Pass quality gate?" as Gate #FEF3C7
+  [Quality gate\npass offline criteria?] as Gate #FEF3C7
   [Model Registry\nversioning, metadata,\nmetrics, approval] as Registry
   [Iterate\ndata fixes, features,\nmodel, target] as Iterate #FFEDD5
 }
 
 package "Serving" #E2E8F0 {
-  diamond "Serving mode?" as Mode #FEF3C7
+  [Serving mode\nbatch / online / hybrid?] as Mode #FEF3C7
 
   [Batch inference job\ndaily/hourly scoring] as Batch
   database "Scores table /\nrecommendations table" as Scores
