@@ -606,7 +606,7 @@ function renderMlsdDiagram(diagram, uml) {
   const talkTrack = (diagram.talkTrack || []).map((point) => `<li>${escapeHtml(point)}</li>`).join("");
   const diagramFrame = imageUrl
     ? `
-      <a class="mlsd-diagram-frame" href="${imageUrl}" target="_blank" rel="noreferrer">
+      <a class="mlsd-diagram-frame mlsd-diagram-frame--${diagram.slug}" href="${imageUrl}" target="_blank" rel="noreferrer">
         <img id="mlsd-diagram-img" src="${imageUrl}" alt="${escapeHtml(diagram.title)}" />
       </a>
       <div class="mlsd-render-warning is-hidden" id="mlsd-render-warning">

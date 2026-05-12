@@ -610,99 +610,44 @@ skinparam roundcorner 18
 skinparam defaultFontName Inter
 skinparam defaultFontSize 13
 skinparam ArrowColor #475569
+skinparam ArrowThickness 1.3
+skinparam linetype ortho
+
+skinparam rectangle {
+  BorderColor #334155
+  FontColor #0F172A
+}
 
 center header
 Lead DS should own framing, trade-offs, interfaces, quality bar and business impact,
 not become a bottleneck for every implementation detail.
 endheader
 
-rectangle "Lead / owner of initiative" as Lead #FEE2E2
+top to bottom direction
 
-package "1. Align business goal" #DBEAFE {
-  rectangle "Stakeholders\nbusiness owner, product, operations" as B1
-  rectangle "Definition of success\nbusiness metric + product metric + guardrails" as B2
-  rectangle "Scope and non-goals\nwhat is MVP, what is later" as B3
-}
+rectangle "Lead / owner of initiative\n\nOwn the problem framing,\ntrade-offs, interfaces,\nquality bar and business impact" as Lead #FEE2E2
 
-package "2. Decompose workstreams" #FEF9C3 {
-  rectangle "Product / Analytics stream\n\nmetric tree, dashboard,\nA/B design, interpretation" as S1
-  rectangle "Data Engineering stream\n\ndata sources, ETL,\nfeature pipelines, data quality" as S2
-  rectangle "ML / DS stream\n\nbaseline, features, model,\noffline validation" as S3
-  rectangle "Backend / Integration stream\n\nAPI, product integration,\ndecision engine, fallback" as S4
-  rectangle "MLOps / Platform stream\n\nserving, registry, CI/CD,\nmonitoring, retraining" as S5
-  rectangle "QA / Risk / Legal stream\n\ntest scenarios, privacy,\nsafety, edge cases" as S6
-}
+rectangle "1. Align business goal\n\nStakeholders:\nbusiness owner, product,\noperations, engineering\n\nDefinition of success:\nbusiness metric + product metric + guardrails\n\nScope:\nMVP now, explicit non-goals,\nlater iterations" as Goal #DBEAFE
 
-package "3. Decision framework" #DCFCE7 {
-  rectangle "Design doc" as D1
-  rectangle "Architecture review" as D2
-  rectangle "Experiment review" as D3
-  rectangle "Launch checklist" as D4
-  rectangle "Rollback criteria" as D5
-}
+rectangle "2. Decompose workstreams\n\nProduct / Analytics:\nmetric tree, dashboard, A/B design\n\nData Engineering:\nsources, ETL, feature pipelines, quality\n\nML / DS:\nbaseline, features, model, offline validation\n\nBackend / Integration:\nAPI, product integration, decision engine, fallback\n\nMLOps / Platform:\nserving, registry, CI/CD, monitoring\n\nQA / Risk / Legal:\ntests, privacy, safety, edge cases" as Streams #FEF9C3
 
-package "4. Risk management" #FFEDD5 {
-  rectangle "Business risks\nwrong metric, cannibalization, no ROI" as R1
-  rectangle "Data risks\nleakage, bias, label delay, bad logging" as R2
-  rectangle "Model risks\ndrift, poor calibration, segment degradation" as R3
-  rectangle "System risks\nlatency, downtime, cost, scaling" as R4
-  rectangle "Org risks\nunclear ownership, dependencies, overengineering" as R5
-}
+rectangle "3. Decision framework\n\nDesign doc:\ngoal, metric tree, data,\nmodel, architecture, risks\n\nReview gates:\narchitecture review, experiment review,\nlaunch readiness\n\nLaunch control:\nstaged rollout, guardrails,\nrollback owner and criteria" as Decisions #DCFCE7
 
-package "5. Keep team lean" #F3E8FF {
-  rectangle "Use MVP first" as L1
-  rectangle "Reuse existing platform and shared services" as L2
-  rectangle "One owner per stream,\nnot one person per task" as L3
-  rectangle "Automate repeatable work" as L4
-  rectangle "Human-in-the-loop only\nwhere risk is high" as L5
-  rectangle "Scale team only after\nbusiness value is proven" as L6
-}
+rectangle "4. Risk management\n\nBusiness:\nwrong metric, cannibalization, no ROI\n\nData:\nleakage, bias, label delay, bad logging\n\nModel:\ndrift, poor calibration, segment degradation\n\nSystem:\nlatency, downtime, cost, scaling\n\nOrganization:\nunclear ownership, dependencies, overengineering" as Risks #FFEDD5
 
-package "Expected lead behavior" #FEE2E2 {
-  rectangle "Lead does not do everything personally" as E1
-  rectangle "Lead owns problem framing,\ntrade-offs, interfaces and quality bar" as E2
-  rectangle "Lead keeps the project moving\nunder uncertainty" as E3
-  rectangle "Lead communicates impact to business\nand details to engineers" as E4
-}
+rectangle "5. Keep team lean\n\nDo:\nuse existing platform, share services,\nautomate repeatable work,\nuse human-in-the-loop only where risk is high\n\nAvoid:\none person per tiny task,\ncustom platform too early,\nscaling team before business value is proven" as Lean #F3E8FF
 
-Lead --> B1
-Lead --> B2
-Lead --> B3
+rectangle "6. Expected lead behavior\n\nLead does not do everything personally.\n\nLead owns:\nframing, trade-offs, interfaces,\nquality bar, risk management\n\nLead communicates:\nimpact to business\nand details to engineers" as Behavior #FEE2E2
 
-Lead --> S1
-Lead --> S2
-Lead --> S3
-Lead --> S4
-Lead --> S5
-Lead --> S6
+rectangle "Interview takeaway\n\nKeep the project moving with clear owners,\nexplicit risks, small MVP,\nreviews and measurable impact" as Takeaway #DBEAFE
 
-Lead --> D1
-D1 --> D2
-D2 --> D3
-D3 --> D4
-D4 --> D5
-
-Lead --> R1
-Lead --> R2
-Lead --> R3
-Lead --> R4
-Lead --> R5
-
-Lead --> L1
-Lead --> L2
-Lead --> L3
-Lead --> L4
-Lead --> L5
-Lead --> L6
-
-B2 --> E2
-D1 --> E2
-R1 --> E3
-L1 --> E1
-L2 --> E3
-E1 --> E4
-E2 --> E4
-E3 --> E4
+Lead --> Goal
+Goal --> Streams
+Streams --> Decisions
+Decisions --> Risks
+Risks --> Lean
+Lean --> Behavior
+Behavior --> Takeaway
 
 @enduml
 ```

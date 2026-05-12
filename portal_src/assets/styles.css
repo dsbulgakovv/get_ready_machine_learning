@@ -812,6 +812,12 @@ body::before {
   margin: 0 auto;
 }
 
+.mlsd-diagram-frame--team_and_lead_ownership img {
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+}
+
 .mlsd-render-warning {
   margin-top: 12px;
   padding: 14px 16px;
@@ -1029,6 +1035,11 @@ body::before {
   .mlsd-diagram-frame img {
     min-width: 760px;
     width: 980px;
+  }
+
+  .mlsd-diagram-frame--team_and_lead_ownership img {
+    min-width: 0;
+    width: 100%;
   }
 
   .markdown-body {
