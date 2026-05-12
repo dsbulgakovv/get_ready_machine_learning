@@ -805,8 +805,9 @@ body::before {
 
 .mlsd-diagram-frame img {
   display: block;
-  max-width: 100%;
-  min-width: 720px;
+  max-width: none;
+  min-width: 900px;
+  width: 1240px;
   height: auto;
   margin: 0 auto;
 }
@@ -1026,7 +1027,8 @@ body::before {
   }
 
   .mlsd-diagram-frame img {
-    min-width: 620px;
+    min-width: 760px;
+    width: 980px;
   }
 
   .markdown-body {

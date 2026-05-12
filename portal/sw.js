@@ -1,4 +1,4 @@
-const CACHE_NAME = "ml-portal-6d92603a05bd";
+const CACHE_NAME = "ml-portal-6e8c52446ce2";
 const PRECACHE_URLS = [
   "./",
   "./assets/app.js",

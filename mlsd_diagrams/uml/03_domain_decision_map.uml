@@ -7,56 +7,61 @@ skinparam roundcorner 18
 skinparam defaultFontName Inter
 skinparam defaultFontSize 13
 skinparam ArrowColor #475569
+skinparam ArrowThickness 1.3
+skinparam linetype ortho
 
 skinparam rectangle {
   BorderColor #334155
   FontColor #0F172A
 }
 
-rectangle "Получили домен / задачу" as A #DBEAFE
-diamond "Что нужно сделать?" as B #FEF3C7
+top to bottom direction
 
-rectangle "Classification\n\nExamples:\nchurn, fraud, propensity, moderation\n\nModels:\nLogReg, CatBoost, LightGBM, NN\n\nMetrics:\nPR-AUC, Precision@K, Recall@K,\ncalibration, expected profit" as C #F3E8FF
+rectangle "Получили домен / задачу" as Task #DBEAFE
+rectangle "Сначала формулируем:\nчто предсказываем,\nранжируем или оптимизируем?" as Question #FEF3C7
 
-rectangle "Regression\n\nExamples:\nETA, LTV, demand, revenue\n\nModels:\nlinear, CatBoost, LightGBM,\nquantile regression\n\nMetrics:\nMAE, RMSE, WAPE, bias,\nquantile loss" as D #F3E8FF
+rectangle "Probability of event\n\nClassification\nchurn, propensity, moderation\n\nModels:\nLogReg, CatBoost, LightGBM, NN\n\nMetrics:\nPR-AUC, Precision@K,\nRecall@K, calibration,\nexpected profit" as Classification #F3E8FF
 
-rectangle "Ranking\n\nExamples:\nsearch, ads, candidates,\nnext-best-action\n\nModels:\nBM25, LambdaMART, CatBoostRanker,\nneural reranker\n\nMetrics:\nNDCG@K, MRR, MAP@K,\nCTR, CVR" as E #F3E8FF
+rectangle "Numeric value\n\nRegression\nETA, LTV, demand, revenue, price\n\nModels:\nlinear model, CatBoost,\nLightGBM, quantile regression\n\nMetrics:\nMAE, RMSE, WAPE,\nbias, quantile loss" as Regression #F3E8FF
 
-rectangle "Recommendation System\n\nArchitecture:\ncandidate generation → ranker\n→ reranker → business rules\n\nModels:\npopular baseline, collaborative filtering,\ntwo-tower, ranker\n\nMetrics:\nCTR, CVR, GMV, retention,\ndiversity, coverage" as F #F3E8FF
+rectangle "Ordered objects\n\nRanking\nsearch, ads, candidates,\nnext-best-action\n\nModels:\nBM25, LambdaMART,\nCatBoostRanker, neural reranker\n\nMetrics:\nNDCG@K, MRR, MAP@K,\nCTR, CVR" as Ranking #F3E8FF
 
-rectangle "Forecasting\n\nExamples:\ndemand, load, supply, revenue\n\nModels:\nnaive, moving average, ARIMA,\nCatBoost with lags, deep forecasting\n\nMetrics:\nWAPE, sMAPE, bias,\nservice level" as G #F3E8FF
+rectangle "Personalized list\n\nRecommendation system\ncandidate generation → ranker\n→ reranker → business rules\n\nModels:\npopular baseline, CF,\ntwo-tower, ranker\n\nMetrics:\nCTR, CVR, GMV,\nretention, diversity, coverage" as Recsys #F3E8FF
 
-rectangle "NLP / LLM\n\nExamples:\nclassification, NER, RAG,\nassistant, summarization\n\nModels:\nTF-IDF baseline, BERT,\nembeddings, LLM, RAG\n\nMetrics:\nF1, retrieval Recall@K,\ngroundedness, hallucination rate,\nhuman eval" as H #F3E8FF
+rectangle "Future over time\n\nForecasting\ndemand, load, supply, revenue\n\nModels:\nnaive, moving average, ARIMA,\nCatBoost with lags,\ndeep forecasting\n\nMetrics:\nWAPE, sMAPE, bias,\nservice level" as Forecasting #F3E8FF
 
-rectangle "CV\n\nExamples:\nOCR, detection, moderation, defects\n\nModels:\nCNN, YOLO, ViT, OCR pipeline\n\nMetrics:\nF1, mAP, IoU,\nCER/WER, manual review reduction" as I #F3E8FF
+rectangle "Text / knowledge task\n\nNLP / LLM / RAG\nclassification, NER, QA,\nassistant, summarization\n\nModels:\nTF-IDF baseline, BERT,\nembeddings, LLM, RAG\n\nMetrics:\nF1, retrieval Recall@K,\ngroundedness, hallucination rate,\nhuman eval" as NLP #F3E8FF
 
-rectangle "Optimization / Pricing\n\nExamples:\ndynamic pricing, promo,\nrouting, allocation\n\nApproach:\nelasticity, causal inference,\nuplift, bandits, constrained optimization\n\nMetrics:\nmargin, revenue, conversion,\nretention, fairness" as J #F3E8FF
+rectangle "Image / visual task\n\nComputer vision\nOCR, detection, moderation,\ndefects, quality control\n\nModels:\nCNN, YOLO, ViT, OCR pipeline\n\nMetrics:\nF1, mAP, IoU,\nCER/WER, manual review reduction" as CV #F3E8FF
 
-rectangle "Fraud / Anomaly Detection\n\nExamples:\npayments, abuse, fake accounts, spam\n\nApproach:\nrules + ML + graph features\n+ human review\n\nMetrics:\nprevented loss,\nPrecision@review_capacity,\nFPR, user friction" as K #F3E8FF
+rectangle "Action / price / resource\n\nOptimization / pricing\ndynamic pricing, promo,\nrouting, allocation\n\nApproach:\nelasticity, causal inference,\nuplift, bandits,\nconstrained optimization\n\nMetrics:\nmargin, revenue, conversion,\nretention, fairness" as Optimization #F3E8FF
 
-rectangle "Always connect to business value" as L #DCFCE7
-rectangle "Then design:\ndata → model → validation → production → A/B → monitoring → team plan" as M #E2E8F0
+rectangle "Rare bad behavior\n\nFraud / anomaly detection\npayments, abuse,\nfake accounts, spam\n\nApproach:\nrules + ML + graph features\n+ human review\n\nMetrics:\nprevented loss,\nPrecision at review capacity,\nFPR, user friction" as Fraud #F3E8FF
 
-A --> B
-B --> C : вероятность события
-B --> D : число
-B --> E : порядок объектов
-B --> F : рекомендации
-B --> G : будущее по времени
-B --> H : смысл из текста
-B --> I : изображения
-B --> J : цена / действие / ресурс
-B --> K : аномалии / злоупотребления
+rectangle "Always connect to business value\n\nRevenue / margin / retention\ncost reduction / risk reduction\nSLA / user experience" as BusinessValue #DCFCE7
 
-C --> L
-D --> L
-E --> L
-F --> L
-G --> L
-H --> L
-I --> L
-J --> L
-K --> L
-L --> M
+rectangle "Then design the system\n\ndata → model → validation\n→ production → A/B\n→ monitoring → team plan" as SystemDesign #E2E8F0
+
+Task --> Question
+Question --> Classification : событие / вероятность
+Question --> Regression : число
+Question --> Ranking : порядок
+Question --> Recsys : персональный список
+Question --> Forecasting : будущее по времени
+Question --> NLP : текст / знания
+Question --> CV : изображение
+Question --> Optimization : цена / действие / ресурс
+Question --> Fraud : аномалии / abuse
+
+Classification --> BusinessValue
+Regression --> BusinessValue
+Ranking --> BusinessValue
+Recsys --> BusinessValue
+Forecasting --> BusinessValue
+NLP --> BusinessValue
+CV --> BusinessValue
+Optimization --> BusinessValue
+Fraud --> BusinessValue
+BusinessValue --> SystemDesign
 
 @enduml
