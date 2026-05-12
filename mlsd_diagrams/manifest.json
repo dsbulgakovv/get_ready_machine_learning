@@ -5,6 +5,7 @@
     "title": "Universal ML System Design Answer Flow",
     "sourceHeading": "Главная схема: универсальный процесс ответа на ML/System Design секции",
     "umlPath": "uml/01_universal_answer_flow.uml",
+    "umlHash": "d0a91b0ce6b8",
     "notePath": "notes/01_universal_answer_flow.md",
     "summary": "Главная карта ответа на ML System Design: от уточнения бизнес-цели до production, A/B, мониторинга и ownership. Ее удобно держать как скелет любого часового ответа.",
     "talkTrack": [
@@ -28,7 +29,8 @@
         "definition": "Расхождение между тем, как фичи считаются на train, и тем, как они доступны в production. Частая причина сильного падения качества после запуска."
       }
     ],
-    "interviewAnswer": "Я бы вел ответ по цепочке Business → Metrics → Data → Model → Validation → Production → A/B → Monitoring → Team. Так я показываю, что дизайн системы начинается с impact, а модель является только одним из компонентов решения."
+    "interviewAnswer": "Я бы вел ответ по цепочке Business → Metrics → Data → Model → Validation → Production → A/B → Monitoring → Team. Так я показываю, что дизайн системы начинается с impact, а модель является только одним из компонентов решения.",
+    "noteHash": "c596d99cfaa1"
   },
   {
     "index": 2,
@@ -36,6 +38,7 @@
     "title": "Metric Tree",
     "sourceHeading": "Дерево метрик для любого кейса",
     "umlPath": "uml/02_metric_tree.uml",
+    "umlHash": "92d778c732ae",
     "notePath": "notes/02_metric_tree.md",
     "summary": "Дерево метрик показывает, как связать бизнес-результат, продуктовые прокси, offline ML-качество, системные ограничения и decision criteria.",
     "talkTrack": [
@@ -63,7 +66,8 @@
         "definition": "Соответствие вероятностей реальной частоте событий. Если модель говорит 0.8, событие должно происходить примерно в 80% таких случаев."
       }
     ],
-    "interviewAnswer": "Я бы построил metric tree: сверху business outcome, ниже product proxy, потом ML metric, guardrails и diagnostics. Это защищает от ситуации, когда offline AUC растет, а продукту становится хуже."
+    "interviewAnswer": "Я бы построил metric tree: сверху business outcome, ниже product proxy, потом ML metric, guardrails и diagnostics. Это защищает от ситуации, когда offline AUC растет, а продукту становится хуже.",
+    "noteHash": "8db17d7da18f"
   },
   {
     "index": 3,
@@ -71,6 +75,7 @@
     "title": "Domain Decision Map",
     "sourceHeading": "Как не потеряться в доменах и выбрать подход",
     "umlPath": "uml/03_domain_decision_map.uml",
+    "umlHash": "24c03aacfa67",
     "notePath": "notes/03_domain_decision_map.md",
     "summary": "Карта выбора ML-подхода по типу задачи: classification, regression, ranking, recsys, forecasting, NLP/LLM, CV, optimization и fraud/anomaly detection.",
     "talkTrack": [
@@ -94,7 +99,8 @@
         "definition": "Моделирование инкрементального эффекта действия: кому пуш, скидка или звонок реально изменит поведение, а не просто совпадет с высокой склонностью купить."
       }
     ],
-    "interviewAnswer": "Я бы сначала определил тип решения: событие, число, ranking, recommendation, forecast, NLP/CV или optimization. Затем предложил baseline, advanced approach, подходящую метрику и объяснил trade-offs."
+    "interviewAnswer": "Я бы сначала определил тип решения: событие, число, ranking, recommendation, forecast, NLP/CV или optimization. Затем предложил baseline, advanced approach, подходящую метрику и объяснил trade-offs.",
+    "noteHash": "50b2db932f7f"
   },
   {
     "index": 4,
@@ -102,6 +108,7 @@
     "title": "Production ML Architecture",
     "sourceHeading": "Production ML architecture с ветвлением batch / online / hybrid",
     "umlPath": "uml/04_production_architecture.uml",
+    "umlHash": "0533b293e967",
     "notePath": "notes/04_production_architecture.md",
     "summary": "End-to-end production контур: ingestion, feature engineering, training, registry, batch/online/hybrid serving, experiments, monitoring и feedback loop.",
     "talkTrack": [
@@ -125,7 +132,8 @@
         "definition": "Хранилище версий моделей с метаданными, метриками, артефактами, стадиями approval и возможностью rollback."
       }
     ],
-    "interviewAnswer": "Я бы описал два контура: данные и обучение offline, затем serving как batch, online или hybrid. После этого добавил бы experiment layer, monitoring, feedback loop и rollback."
+    "interviewAnswer": "Я бы описал два контура: данные и обучение offline, затем serving как batch, online или hybrid. После этого добавил бы experiment layer, monitoring, feedback loop и rollback.",
+    "noteHash": "5df0b11b0bc5"
   },
   {
     "index": 5,
@@ -133,6 +141,7 @@
     "title": "Team and Lead Ownership",
     "sourceHeading": "Команда и роль лида без раздувания штата",
     "umlPath": "uml/05_team_and_lead_ownership.uml",
+    "umlHash": "f8b29e263201",
     "notePath": "notes/05_team_and_lead_ownership.md",
     "summary": "Схема показывает, как lead DS держит framing, trade-offs, interfaces, quality bar и delivery без раздувания команды.",
     "talkTrack": [
@@ -156,7 +165,8 @@
         "definition": "То, что команда сознательно не делает в MVP. Это защищает от расползания scope и overengineering."
       }
     ],
-    "interviewAnswer": "Как lead я бы держал цель, риски, ключевые trade-offs и интерфейсы между потоками. Команду разложил бы на owners по streams и начал с MVP на существующей платформе."
+    "interviewAnswer": "Как lead я бы держал цель, риски, ключевые trade-offs и интерфейсы между потоками. Команду разложил бы на owners по streams и начал с MVP на существующей платформе.",
+    "noteHash": "95a36795f53a"
   },
   {
     "index": 6,
@@ -164,6 +174,7 @@
     "title": "60-Minute Interview Answer Timeline",
     "sourceHeading": "Как отвечать на секции именно в течение 1 часа",
     "umlPath": "uml/06_sixty_minute_timeline.uml",
+    "umlHash": "dbab45723cf4",
     "notePath": "notes/06_sixty_minute_timeline.md",
     "summary": "Тайминг часового MLSD ответа: сколько времени тратить на clarification, metrics, data/model, architecture, validation, team plan и final summary.",
     "talkTrack": [
@@ -187,7 +198,8 @@
         "definition": "Модель считает решения в production-потоке, но не влияет на пользователя. Нужен для проверки latency, логирования и стабильности."
       }
     ],
-    "interviewAnswer": "Я бы управлял временем явно: 5 минут clarification, 5 минут metrics, 20 минут data/model, 10 минут architecture, 8 минут validation, 7 минут team/risk и 5 минут на summary."
+    "interviewAnswer": "Я бы управлял временем явно: 5 минут clarification, 5 минут metrics, 20 минут data/model, 10 минут architecture, 8 минут validation, 7 минут team/risk и 5 минут на summary.",
+    "noteHash": "f2c454226933"
   },
   {
     "index": 7,
@@ -195,6 +207,7 @@
     "title": "Model Validation and A/B Test Flow",
     "sourceHeading": "A/B и валидация модели",
     "umlPath": "uml/07_validation_and_ab_flow.uml",
+    "umlHash": "34e754619fb1",
     "notePath": "notes/07_validation_and_ab_flow.md",
     "summary": "Путь от offline validation до решения ship/iterate/rollback: корректный split, метрики, segment analysis, shadow/A-A, дизайн A/B, SRM и rollout.",
     "talkTrack": [
@@ -218,7 +231,8 @@
         "definition": "Проверка, что выигрыш не куплен сильной деградацией по регионам, устройствам, категориям, новым пользователям или high-value cohorts."
       }
     ],
-    "interviewAnswer": "Я бы не запускал модель только по offline metric. Сначала корректный split и segment analysis, потом shadow/A-A/logging checks, затем A/B с guardrails и постепенный rollout."
+    "interviewAnswer": "Я бы не запускал модель только по offline metric. Сначала корректный split и segment analysis, потом shadow/A-A/logging checks, затем A/B с guardrails и постепенный rollout.",
+    "noteHash": "9eeefcd90d63"
   },
   {
     "index": 8,
@@ -226,6 +240,7 @@
     "title": "Senior Answer Loop",
     "sourceHeading": "Компактная схема для запоминания: Senior answer loop",
     "umlPath": "uml/08_senior_answer_loop.uml",
+    "umlHash": "6abc2616963e",
     "notePath": "notes/08_senior_answer_loop.md",
     "summary": "Компактная петля для запоминания: Business → Metrics → Data → Model → Validation → Production → Experiment → Monitoring → Team → Business impact.",
     "talkTrack": [
@@ -249,7 +264,8 @@
         "definition": "План быстрого отката модели, конфигурации или rollout percentage при ухудшении guardrails или системной стабильности."
       }
     ],
-    "interviewAnswer": "Мой короткий фрейм: business value, metrics, data trust, baseline/model, validation, production, A/B, monitoring, team ownership и возврат к impact."
+    "interviewAnswer": "Мой короткий фрейм: business value, metrics, data trust, baseline/model, validation, production, A/B, monitoring, team ownership и возврат к impact.",
+    "noteHash": "a206081aa240"
   },
   {
     "index": 9,
@@ -257,6 +273,7 @@
     "title": "Interview Quick Reference",
     "sourceHeading": "Версия, которую можно держать перед глазами на собесе",
     "umlPath": "uml/09_interview_quick_reference.uml",
+    "umlHash": "541032fda302",
     "notePath": "notes/09_interview_quick_reference.md",
     "summary": "Одностраничная шпаргалка с полной последовательностью ответа и подсказками справа: что уточнить, какие метрики назвать, как перейти к production и lead ownership.",
     "talkTrack": [
@@ -280,6 +297,7 @@
         "definition": "Слой после модели, который применяет thresholds, business rules, constraints, fallback и иногда human-review routing."
       }
     ],
-    "interviewAnswer": "Я бы шел по этой странице сверху вниз и в каждом блоке давал конкретный пример: metric, data risk, baseline, serving mode, validation check, rollout и owner."
+    "interviewAnswer": "Я бы шел по этой странице сверху вниз и в каждом блоке давал конкретный пример: metric, data risk, baseline, serving mode, validation check, rollout и owner.",
+    "noteHash": "4ed983ffcecf"
   }
 ]

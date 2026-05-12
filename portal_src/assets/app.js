@@ -25,6 +25,7 @@ const CATEGORY_ORDER = [
 const MLSD_ROUTE = "mlsd";
 const PLANTUML_SERVER = "https://www.plantuml.com/plantuml/svg/";
 const PLANTUML_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_";
+const RUNTIME_CACHE_BUST = Date.now().toString(36);
 
 const state = {
   mode: "study",
@@ -100,6 +101,15 @@ function isMlsdPath(path) {
 
 function getMlsdPath(slug) {
   return slug ? `${MLSD_ROUTE}/${slug}` : MLSD_ROUTE;
+}
+
+function getVersionedMlsdAsset(path, version) {
+  const suffix = version ? `?v=${encodeURIComponent(version)}` : "";
+  return `./mlsd/${path}${suffix}`;
+}
+
+function getRuntimeVersionedAsset(path) {
+  return `${path}?v=${RUNTIME_CACHE_BUST}`;
 }
 
 function pluralize(value, one, few, many) {
@@ -555,7 +565,9 @@ async function fetchMarkdownBySourcePath(sourcePath) {
 
 async function fetchMlsdManifest() {
   try {
-    const response = await fetch("./mlsd/manifest.json");
+    const response = await fetch(getRuntimeVersionedAsset("./mlsd/manifest.json"), {
+      cache: "no-store",
+    });
     if (!response.ok) {
       return [];
     }
@@ -567,7 +579,9 @@ async function fetchMlsdManifest() {
 }
 
 async function fetchMlsdUml(diagram) {
-  const response = await fetch(`./mlsd/${diagram.umlPath}`);
+  const response = await fetch(getVersionedMlsdAsset(diagram.umlPath, diagram.umlHash), {
+    cache: "no-store",
+  });
   if (!response.ok) {
     return null;
   }
@@ -600,8 +614,8 @@ function renderMlsdTerms(diagram) {
 }
 
 function renderMlsdDiagram(diagram, uml) {
-  const sourceHref = `./mlsd/${diagram.umlPath}`;
-  const noteHref = `./mlsd/${diagram.notePath}`;
+  const sourceHref = getVersionedMlsdAsset(diagram.umlPath, diagram.umlHash);
+  const noteHref = getVersionedMlsdAsset(diagram.notePath, diagram.noteHash);
   const imageUrl = uml ? buildPlantUmlUrl(uml) : null;
   const talkTrack = (diagram.talkTrack || []).map((point) => `<li>${escapeHtml(point)}</li>`).join("");
   const diagramFrame = imageUrl
@@ -871,6 +885,14 @@ function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) {
     return;
   }
+
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
+
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("./sw.js").catch((error) => {
       console.error("Service worker registration failed", error);
@@ -879,7 +901,9 @@ function registerServiceWorker() {
 }
 
 async function init() {
-  const response = await fetch("./assets/modules.json");
+  const response = await fetch(getRuntimeVersionedAsset("./assets/modules.json"), {
+    cache: "no-store",
+  });
   const [modules, diagrams] = await Promise.all([response.json(), fetchMlsdManifest()]);
   state.modules = modules;
   state.diagrams = diagrams;

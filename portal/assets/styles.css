@@ -784,7 +784,7 @@ body::before {
 
 .mlsd-viewer-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
   align-items: start;
 }
@@ -796,8 +796,8 @@ body::before {
 
 .mlsd-diagram-frame {
   display: block;
-  min-height: 420px;
-  padding: 12px;
+  min-height: 300px;
+  padding: 10px;
   border-radius: 14px;
   background: #ffffff;
   overflow: auto;
@@ -805,9 +805,9 @@ body::before {
 
 .mlsd-diagram-frame img {
   display: block;
-  max-width: none;
-  min-width: 900px;
-  width: 1240px;
+  max-width: 100%;
+  min-width: 0;
+  width: 680px;
   height: auto;
   margin: 0 auto;
 }
@@ -815,7 +815,7 @@ body::before {
 .mlsd-diagram-frame--team_and_lead_ownership img {
   max-width: 100%;
   min-width: 0;
-  width: 100%;
+  width: 720px;
 }
 
 .mlsd-render-warning {
@@ -909,6 +909,12 @@ body::before {
 
 .mobile-only {
   display: none;
+}
+
+@media (min-width: 1440px) {
+  .mlsd-viewer-grid {
+    grid-template-columns: minmax(0, 1fr) 340px;
+  }
 }
 
 @media (max-width: 1180px) {
@@ -1029,17 +1035,17 @@ body::before {
   }
 
   .mlsd-diagram-frame {
-    min-height: 320px;
+    min-height: 260px;
   }
 
   .mlsd-diagram-frame img {
-    min-width: 760px;
-    width: 980px;
+    min-width: 0;
+    width: 620px;
   }
 
   .mlsd-diagram-frame--team_and_lead_ownership img {
     min-width: 0;
-    width: 100%;
+    width: 620px;
   }
 
   .markdown-body {

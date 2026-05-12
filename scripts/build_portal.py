@@ -168,6 +168,21 @@ def write_manifest(manifest: list[dict[str, object]]) -> None:
     (assets_dir / "modules.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def short_file_hash(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()[:12]
+
+
+def write_asset_versions() -> None:
+    index_path = PORTAL_OUT / "index.html"
+    app_hash = short_file_hash(PORTAL_OUT / "assets" / "app.js")
+    styles_hash = short_file_hash(PORTAL_OUT / "assets" / "styles.css")
+
+    html = index_path.read_text(encoding="utf-8")
+    html = html.replace("./assets/styles.css", f"./assets/styles.css?v={styles_hash}")
+    html = html.replace("./assets/app.js", f"./assets/app.js?v={app_hash}")
+    index_path.write_text(html, encoding="utf-8")
+
+
 def collect_precache_urls(manifest: list[dict[str, object]], mlsd_urls: list[str]) -> list[str]:
     urls = [
         "./",
@@ -215,6 +230,28 @@ def write_service_worker(manifest: list[dict[str, object]], mlsd_urls: list[str]
 
     script = f"""const CACHE_NAME = "{cache_name}";
 const PRECACHE_URLS = {json.dumps(precache_urls, ensure_ascii=False, indent=2)};
+const NETWORK_FIRST_PATHS = ["/assets/", "/content/", "/mlsd/"];
+
+function shouldUseNetworkFirst(url) {{
+  return NETWORK_FIRST_PATHS.some((path) => url.pathname.includes(path));
+}}
+
+function isCacheable(response) {{
+  return response && response.status === 200 && response.type === "basic";
+}}
+
+function cacheFallback(request) {{
+  return caches
+    .match(request)
+    .then((cachedResponse) => cachedResponse || caches.match(request, {{ ignoreSearch: true }}));
+}}
+
+function offlineResponse() {{
+  return new Response("Offline", {{
+    status: 503,
+    headers: {{ "Content-Type": "text/plain; charset=utf-8" }},
+  }});
+}}
 
 self.addEventListener("install", (event) => {{
   event.waitUntil(
@@ -256,14 +293,33 @@ self.addEventListener("fetch", (event) => {{
     return;
   }}
 
+  if (shouldUseNetworkFirst(url)) {{
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {{
+          if (!isCacheable(networkResponse)) {{
+            return networkResponse;
+          }}
+
+          const responseClone = networkResponse.clone();
+          event.waitUntil(
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone))
+          );
+          return networkResponse;
+        }})
+        .catch(() => cacheFallback(request).then((cachedResponse) => cachedResponse || offlineResponse()))
+    );
+    return;
+  }}
+
   event.respondWith(
-    caches.match(request).then((cachedResponse) => {{
+    cacheFallback(request).then((cachedResponse) => {{
       if (cachedResponse) {{
         return cachedResponse;
       }}
 
       return fetch(request).then((networkResponse) => {{
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== "basic") {{
+        if (!isCacheable(networkResponse)) {{
           return networkResponse;
         }}
 
@@ -328,6 +384,7 @@ def main() -> None:
     copy_content()
     mlsd_urls = copy_mlsd_diagrams()
     write_manifest(manifest)
+    write_asset_versions()
     write_service_worker(manifest, mlsd_urls)
     write_nojekyll()
     write_readme()

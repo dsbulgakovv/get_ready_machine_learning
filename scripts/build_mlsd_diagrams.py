@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import re
 import shutil
 from pathlib import Path
@@ -96,6 +97,12 @@ def write_note(entry: dict[str, object], note_path: Path) -> None:
     note_path.write_text("\n".join(lines), encoding="utf-8")
 
 
+def short_hash(content: str | bytes) -> str:
+    if isinstance(content, str):
+        content = content.encode("utf-8")
+    return hashlib.sha256(content).hexdigest()[:12]
+
+
 def main() -> None:
     markdown = SOURCE_MD.read_text(encoding="utf-8")
     catalog = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
@@ -119,7 +126,8 @@ def main() -> None:
         relative_uml_path = f"uml/{filename}"
         relative_note_path = f"notes/{note_filename}"
 
-        uml_path.write_text(str(block["uml"]), encoding="utf-8")
+        uml_source = str(block["uml"])
+        uml_path.write_text(uml_source, encoding="utf-8")
 
         entry = {
             "index": block_index,
@@ -127,6 +135,7 @@ def main() -> None:
             "title": metadata["title"],
             "sourceHeading": block["heading"],
             "umlPath": relative_uml_path,
+            "umlHash": short_hash(uml_source),
             "notePath": relative_note_path,
             "summary": metadata["summary"],
             "talkTrack": metadata["talkTrack"],
@@ -134,6 +143,7 @@ def main() -> None:
             "interviewAnswer": metadata["interviewAnswer"],
         }
         write_note(entry, note_path)
+        entry["noteHash"] = short_hash(note_path.read_bytes())
         manifest.append(entry)
 
     missing = sorted(set(catalog_by_index) - {int(block["index"]) for block in blocks})

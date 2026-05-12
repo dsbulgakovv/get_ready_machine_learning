@@ -1,4 +1,4 @@
-const CACHE_NAME = "ml-portal-9916abf32645";
+const CACHE_NAME = "ml-portal-6ff00afc61aa";
 const PRECACHE_URLS = [
   "./",
   "./assets/app.js",
@@ -47,6 +47,28 @@ const PRECACHE_URLS = [
   "./mlsd/uml/09_interview_quick_reference.uml",
   "./site.webmanifest"
 ];
+const NETWORK_FIRST_PATHS = ["/assets/", "/content/", "/mlsd/"];
+
+function shouldUseNetworkFirst(url) {
+  return NETWORK_FIRST_PATHS.some((path) => url.pathname.includes(path));
+}
+
+function isCacheable(response) {
+  return response && response.status === 200 && response.type === "basic";
+}
+
+function cacheFallback(request) {
+  return caches
+    .match(request)
+    .then((cachedResponse) => cachedResponse || caches.match(request, { ignoreSearch: true }));
+}
+
+function offlineResponse() {
+  return new Response("Offline", {
+    status: 503,
+    headers: { "Content-Type": "text/plain; charset=utf-8" },
+  });
+}
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -88,14 +110,33 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  if (shouldUseNetworkFirst(url)) {
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {
+          if (!isCacheable(networkResponse)) {
+            return networkResponse;
+          }
+
+          const responseClone = networkResponse.clone();
+          event.waitUntil(
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone))
+          );
+          return networkResponse;
+        })
+        .catch(() => cacheFallback(request).then((cachedResponse) => cachedResponse || offlineResponse()))
+    );
+    return;
+  }
+
   event.respondWith(
-    caches.match(request).then((cachedResponse) => {
+    cacheFallback(request).then((cachedResponse) => {
       if (cachedResponse) {
         return cachedResponse;
       }
 
       return fetch(request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== "basic") {
+        if (!isCacheable(networkResponse)) {
           return networkResponse;
         }
 

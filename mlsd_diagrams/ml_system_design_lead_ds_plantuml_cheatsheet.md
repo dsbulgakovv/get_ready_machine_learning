@@ -475,123 +475,52 @@ skinparam defaultFontSize 13
 skinparam ArrowColor #475569
 skinparam ArrowThickness 1.3
 
-skinparam component {
+skinparam rectangle {
   BorderColor #334155
   FontColor #0F172A
 }
 
-left to right direction
+top to bottom direction
 
-package "Data ingestion" #DBEAFE {
-  [Product / business event] as Event
-  [Event logging] as Logging
-  [Kafka / streaming\nclicks, transactions, feedback] as Kafka #FEF9C3
-  database "Data Lake / DWH\nraw logs, transactions, profiles" as DWH #FEF9C3
-}
+rectangle "1. Data ingestion\nbusiness events, logs,\nKafka / queues, DWH / lake" as Ingest #DBEAFE
+rectangle "2. Feature engineering\noffline ETL + online features\nfreshness and schema checks" as Features #FEF9C3
+rectangle "3. Training pipeline\ndataset build, model train,\noffline evaluation" as Train #F3E8FF
+rectangle "4. Quality gate\nmetric threshold, slices,\ncalibration and regression tests" as Gate #FEF3C7
+rectangle "Fix and iterate\ndata bugs, target leakage,\nfeatures, model choice" as Iterate #FFEDD5
+rectangle "5. Model registry\nversion, metadata, approval,\nrollback candidate" as Registry #E2E8F0
+rectangle "6. Serving choice\nlatency, freshness, cost,\nexplainability, fallback" as ServingChoice #FEF3C7
 
-package "Feature engineering" #FEF9C3 {
-  [ETL / ELT\nSpark / SQL / Airflow] as ETL
-  [Stream processing\nFlink / Spark Streaming / consumers] as Stream
-  database "Offline Feature Store" as OFS
-  database "Online Feature Store\nRedis / low-latency storage" as OnFS
-}
+rectangle "Batch path\nperiodic scoring,\nscores table,\nbackend reads precomputed result" as Batch #DBEAFE
+rectangle "Online path\nREST / gRPC model service,\nonline feature store,\ndecision engine + fallback" as Online #DCFCE7
+rectangle "Hybrid path\nprecomputed candidates,\nlight online reranker,\nfinal response" as Hybrid #EDE9FE
 
-package "Training and registry" #F3E8FF {
-  [Training dataset builder] as Builder
-  [Model training pipeline] as Train
-  [Offline evaluation] as Eval
-  [Quality gate\npass offline criteria?] as Gate #FEF3C7
-  [Model Registry\nversioning, metadata,\nmetrics, approval] as Registry
-  [Iterate\ndata fixes, features,\nmodel, target] as Iterate #FFEDD5
-}
+rectangle "7. Experiment and rollout\nshadow mode, A/B test,\ngradual rollout, rollback" as Experiment #FFEDD5
+rectangle "8. Monitoring\nData: freshness / drift\nModel: quality / calibration\nBusiness: value / complaints\nSystem: latency / errors / cost" as Monitoring #DCFCE7
+rectangle "9. Feedback loop\nlabels, user actions,\nincidents, retraining signals" as Feedback #E0F2FE
 
-package "Serving" #E2E8F0 {
-  [Serving mode\nbatch / online / hybrid?] as Mode #FEF3C7
+Ingest --> Features
+Features --> Train
+Train --> Gate
 
-  [Batch inference job\ndaily/hourly scoring] as Batch
-  database "Scores table /\nrecommendations table" as Scores
-  [Product backend reads\nprecomputed scores] as BatchProduct
+Gate --> Iterate : fail
+Iterate --> Features : repair
 
-  [Online model serving\nREST/gRPC service] as Online
-  [Decision engine\nbusiness rules, thresholds, fallback] as Decision
-  [Product API response] as Response
+Gate --> Registry : pass
+Registry --> ServingChoice
 
-  [Batch candidates /\nheavy features] as HybridBatch
-  [Online lightweight reranker] as Reranker
-  [Final decision / response] as HybridResponse
-}
+ServingChoice --> Batch : stale is OK
+ServingChoice --> Online : need low latency
+ServingChoice --> Hybrid : heavy features + fresh context
 
-package "Experiment and rollout" #FFEDD5 {
-  [Experiment / rollout layer] as Experiment
-  [Shadow mode] as Shadow
-  [A/B test] as AB
-  [Gradual rollout] as Rollout
-  [Rollback if guardrails fail] as Rollback
-}
+Features --> Online : online features
+Batch --> Experiment
+Online --> Experiment
+Hybrid --> Experiment
 
-package "Monitoring and feedback" #DCFCE7 {
-  [Data monitoring\nfreshness, missing, drift, schema] as DataMon
-  [Model monitoring\nscore drift, calibration,\nquality by segment] as ModelMon
-  [Business monitoring\nrevenue, conversion,\nretention, complaints] as BizMon
-  [System monitoring\nlatency, errors, RPS,\nqueue lag, cost] as SysMon
-  [Feedback loop] as Feedback
-}
-
-Event --> Logging
-Logging --> Kafka
-Logging --> DWH
-
-DWH --> ETL
-Kafka --> Stream
-ETL --> OFS
-Stream --> OnFS
-
-OFS --> Builder
-Builder --> Train
-Train --> Eval
-Eval --> Gate
-
-Gate --> Iterate : no
-Iterate --> Builder
-
-Gate --> Registry : yes
-Registry --> Mode
-
-Mode --> Batch : batch scoring
-Batch --> Scores
-Scores --> BatchProduct
-
-Mode --> Online : online inference
-OnFS --> Online
-Online --> Decision
-Decision --> Response
-
-Mode --> HybridBatch : hybrid
-HybridBatch --> Reranker
-OnFS --> Reranker
-Reranker --> HybridResponse
-
-BatchProduct --> Experiment
-Response --> Experiment
-HybridResponse --> Experiment
-
-Experiment --> Shadow
-Experiment --> AB
-Experiment --> Rollout
-Experiment --> Rollback
-
-Shadow --> DataMon
-AB --> ModelMon
-Rollout --> BizMon
-Rollback --> SysMon
-
-DataMon --> Feedback
-ModelMon --> Feedback
-BizMon --> Feedback
-SysMon --> Feedback
-
-Feedback --> DWH
-Feedback --> Kafka
+Experiment --> Monitoring
+Monitoring --> Feedback
+Feedback --> Ingest
+Feedback --> Train : retrain / refresh
 
 @enduml
 ```
